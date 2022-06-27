@@ -13,6 +13,12 @@ app.use(cors());
 app.use('/api/users', usersRoutes) 
 
 
-app.listen(port, () => console.log('Listenning on '+port));
+if(process.env.NODE_ENV !== "test"){
+    app.listen(port, () => {
+        console.log('Listenning... '+port)
+    });
+}
 
+
+module.exports= {app};
 
