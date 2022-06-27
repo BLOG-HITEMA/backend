@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/H3-API-MEDIUM/backend.git"
+    "url": "git+https://github.com/BLOG-HITEMA/backend.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/H3-API-MEDIUM/backend/issues"
+    "url": "https://github.com/BLOG-HITEMA/backend/issues"
   },
-  "homepage": "https://github.com/H3-API-MEDIUM/backend#readme",
+  "homepage": "https://github.com/BLOG-HITEMA/backend#readme",
   "dependencies": {
     "axios": "^0.27.2",
     "bcrypt": "^5.0.1",
