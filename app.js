@@ -2,14 +2,17 @@ const express = require("express")
 const bodyParser = require("body-parser")
 const cors = require('cors')
 const app = express();
-require('dotenv').config();
-const mongoose = require('mongoose');
+const articlesRoutes = require('./routes/articles-routes');
 const usersRoutes = require('./routes/users-routes');
+const mongoose = require('mongoose');
+require('dotenv').config();
 
 const port = process.env.PORT;
 app.use(bodyParser.json())
 app.use(cors());
 
+// Les routes de base (Articles & Users)
+app.use("/api/articles", articlesRoutes);
 app.use('/api/users', usersRoutes) 
 
 if(process.env.NODE_ENV !== "test"){
