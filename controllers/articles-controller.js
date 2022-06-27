@@ -14,7 +14,7 @@ const create = async (req, res) => {
     });
 
     await article.save();
-    res.send(article);
+    res.status(201).send(article);
 }
 
 module.exports = { create };
