@@ -73,6 +73,52 @@ const getUserByName = async (req, res, next) => {
     res.status(200).json(user)
 }
 
+const updateUser = async (req, res, next) => {
+    const nom = req.params.name;
+    const {name, firstname, password} = req.body;
+
+    const userToUpdate = await User.findOne({name: nom});
+    let hashedPassword;
+    try{
+        hashedPassword = await bcrypt.hash(password, 12);
+    }catch(err){
+        const error = new HttpError(
+            'Erreur lors de la création du compte, veuillez ressayer ultérieurement.',
+            500
+            )
+            return next(error);
+        }
+    userToUpdate.firstname = firstname;
+    userToUpdate.password = hashedPassword;
+    userToUpdate.name = name;
+    try {
+        await userToUpdate.save();
+    } catch (err) {
+        const error = new HttpError(
+            "Erreur lors de la modification de l'utilisateur, veuillez ressayer ultérieurement.",
+            500
+        )
+        return next(error);
+    }
+    res.status(200).json({"message": "Updated"});
+}
+
+const deleteUser = async (req, res, nex) => {
+    const name = req.params.name;
+    const userToDelete = await User.findOne({name: name});
+    
+    try {
+       await userToDelete.delete();
+    } catch (err) {
+        const error = new HttpError(
+            "Erreur lors de la suppression de l'utilisateur, veuillez ressayer ultérieurement.",
+            500
+        )
+        return next(error);
+    }
+    res.status(200).json({"message": "Deleted"});
+}
+
 const login = async (req, res, next) => {
     const {email, password} = req.body;
 
@@ -135,5 +181,7 @@ const login = async (req, res, next) => {
 }
 
 exports.getUserByName = getUserByName;
+exports.updateUser = updateUser;
+exports.deleteUser = deleteUser;
 exports.signup = signup;
 exports.login = login;

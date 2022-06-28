@@ -3,7 +3,10 @@ const mongoose = require('mongoose');
 
 const joiSchema = Joi.object({
     title : Joi.string().min(2).max(255).required(),
-    content : Joi.number().required()
+    content : Joi.string().min(2).max(255).required(),
+    published : Joi.boolean(),
+    image : Joi.string().min(2).max(255),
+    message : Joi.string().min(2).max(255)
 });
 
 const schema = new mongoose.Schema({
@@ -11,7 +14,15 @@ const schema = new mongoose.Schema({
     content: String,
     published: Boolean,
     image: String,
-    message: String
+    message: String,
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
+    journal: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Journal'
+    }
 });
 
 const Article = mongoose.model('Article', schema);
