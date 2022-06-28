@@ -14,7 +14,15 @@ const schema = new mongoose.Schema({
     content: String,
     published: Boolean,
     image: String,
-    message: String
+    message: String,
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
+    journal: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Journal'
+    }
 });
 
 const Article = mongoose.model('Article', schema);
