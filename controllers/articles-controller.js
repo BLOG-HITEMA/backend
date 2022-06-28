@@ -4,30 +4,48 @@ const User = require('../models/user');
 const create = async (req, res) => {
     const payload = req.body;
     const { error } = joiSchema.validate(payload);
-    if (error) return res.sendStatus(400).send(error.details[0].message);
+    if (error) return res.status(400).send(error.details[0].message);
 
     let user = null;
+    let article = null;
 
-    // if (payload.token) {
-    //     const decoded = jwt.verify(payload.token, process.env.CLE_TOKEN);
-    //     // user = await User.findById(decoded.id);
-    //     user = await User.findById("62bafd1c8b3edd047ac35c7b");
-    // }
+    if (payload.token) {
+        const decoded = jwt.verify(payload.token, process.env.CLE_TOKEN);
+        user = await User.findById(decoded.id).exec()
+            .then( async (data) => {
+                if (!data) {
+                    
+                    article = new Article({
+                        title: payload.title,
+                        content: payload.content,
+                        published: payload.published,
+                        image: payload.image,
+                        message: payload.message,
+                    });
+    
+                    await article.save();
+                }
+                
+                else {
+                    article = new Article({
+                        title: payload.title,
+                        content: payload.content,
+                        published: payload.published,
+                        image: payload.image,
+                        message: payload.message,
+                        user: data._id
+                    });
+        
+                    await article.save();
+                }
+    
+            })
+        ;
 
-    user = await User.findById("62bafd1c8b3edd047ac35c7b");
+        return res.status(201).send(article);
+    }
 
-    const article = new Article({
-        title: payload.title,
-        content: payload.content,
-        published: payload.published,
-        image: payload.image,
-        message: payload.message,
-        user: user._id
-    });
-
-    await article.save();
-    res.sendStatus(201).send(article);
-    res.sendStatus(400).send({erreur : error.message});
+    res.status(400).send("L'auteur n'a pas été préciser.");
 }
 
 const update = async (req, res) => {
