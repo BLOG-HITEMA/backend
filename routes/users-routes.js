@@ -14,4 +14,6 @@ router.post('/signup', [
 
 router.get('/:name', usersControllers.getUserByName)
 
+router.post('/login', usersControllers.login)
+
 module.exports = router;
