@@ -28,8 +28,9 @@ const update = async (req, res) => {
     res.status(200).send({ _id : article._id, ...payload});
 }
 
-const deleteArticle = (req, res) => {
-
+const deleteArticle = async (req, res) => {
+    const article = await Article.findByIdAndDelete(req.params.id);
+    res.status(200).send("Article supprimé");
 }
 
 const storeArticleInJournal = (req, res) => {
