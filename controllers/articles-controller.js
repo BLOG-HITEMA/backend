@@ -76,16 +76,18 @@ const storeArticleInJournal = (req, res) => {
 
 }
 
-const getArticlesByAuthor = (req, res) => {
+const getArticlesByAuthor = async (req, res) => {
     const author = req.params.id;
-    console.log(Article.find());
-    // Article.find({user: author}).exec()
-    // .then( (data) => {
-    //     if (!data) return res.sendStatus(404).send({message : "Aucun article trouvé."});
-    //     res.status(200).send(data);
-    // }).catch( (err) => {
-    //     res.status(500).send({message : "Erreur lors de la récupération des articles."});
-    // } );
+
+    const user = await User.findById(author);
+
+    if (!user) return res.status(404).send({message : "L'utilisateur n'existe pas."});
+
+    const articles = await Article.find({user: author});
+
+    if (!articles) return res.status(404).send({message : "Aucun article n'a été trouvé."});
+    
+    res.status(200).send(articles);
 }
 
 const acceptArticle = (req, res) => {
