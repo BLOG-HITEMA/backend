@@ -1,24 +1,14 @@
-const Joi = require('joi');
 const mongoose = require('mongoose');
 
-const joiSchema = Joi.object({
-    title : Joi.string().min(2).max(255).required()
-});
+const Schema = mongoose.Schema;
 
-const schema = new mongoose.Schema({
-    title: String,
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-    },
+const journalSchema = new Schema({
+    title: {type:String, require:true},
+    user: {type:mongoose.Types.ObjectId, require:true, ref: 'User'},
     articles: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Article'
-        }
+        {type:mongoose.Types.ObjectId, require:false, ref: 'Article'}
     ]
 });
 
-const Journal = mongoose.model('Journal', schema);
 
-module.exports = { Journal, joiSchema };
+module.exports = mongoose.model('Journal', journalSchema);
