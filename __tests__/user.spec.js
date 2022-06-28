@@ -7,7 +7,8 @@ const mongoose = require("mongoose")
 const baseUrl = "/api/users"
 
 // Tester la route POST de user sans BD
-describe("Tester la route api/users/signup", () => {
+describe("Tester la route api/users", () => {
+  // 1) la route api/users/signup
   it("Doit ajouter et retourner un status 201", () => {
     const user = {
       name: "Deadpool",
@@ -21,6 +22,39 @@ describe("Tester la route api/users/signup", () => {
       .send(user)
       .expect(201);
   });
+  // Si le mot de passe est vide, ont doit avoir une erreur
+  it("Doit renvoyer une erreur si le mot de passe est vide", async () => {
+    try {
+      await new User({
+        name: "Deadpool",
+        firstname: "Deadool",
+        password: "",
+        email: "deadpool@gmail.com",
+        role: "editor"
+      }).save()
+    } catch (err) {
+      expect(err.errors.password.message).toContain("shorter")
+    }
+    //Supprimer l'utilisateur de test de la BD
+    const delUser = await User.deleteOne({email: "deadpool@gmail.com"});
+  })
+  // Si le mot de passe est inférieur de 6 caractères on doit avoir une erreur
+  it("Doit renvoyer une erreur si le mot de passe est inférieur de 6 caractères", async () => {
+    try {
+      await new User({
+        name: "Deadpool",
+        firstname: "Deadool",
+        password: "12345",
+        email: "deadpool@gmail.com",
+        role: "editor"
+      }).save()
+    } catch (err) {
+      expect(err.errors.password.message).toContain("is shorter than")
+    }
+    //Supprimer l'utilisateur de test de la BD
+    const delUser = await User.deleteOne({email: "deadpool@gmail.com"});
+
+  })
   // Vérifier dans le cas où l'utilisateurs oublie de mettre une donnée
   it.each([
     { name: "PasDeEmail",firstname:"firstnameTest",password:"test123",role:"editor" }, 
@@ -36,9 +70,38 @@ describe("Tester la route api/users/signup", () => {
         .expect(422);
     }
   );
+
+  // 2) La route PATCH api/users/:name
+  it("Doit modifier et retourner un status 200", async () => {
+    let nameUnique = (Math.random() + 1).toString(36).substring(7);
+    const user = {
+      name: nameUnique,
+      firstname: "Deadool",
+      password: "secret1234"
+    }
+    user.password = await bcrypt.hash(user.password, 12);
+    const result = request(app)
+      .patch(baseUrl+"/admin")
+      .send(user)
+      .expect(200);
+  });
+  // 3) La route DELETE api/users/:name
+  it("Doit supprimer et retourner un status 200", async () => {
+    const userDeTest = await User.create({
+      name: "UserX",
+      firstname: "FirstnameX",
+      password: "secret1234",
+      email: "testXX@gmail.com",
+      role: "editor"
+    })
+    const result = request(app)
+      .delete(baseUrl+"/UserX")
+      .expect(200);
+    await userDeTest.delete();
+  });
 })
 
-// Se connecter à MONGO DB
+// Se connecter à MONGO DB avant chaque test qui concerne la BD
 beforeEach((done) => {
 	mongoose.connect(
 		process.env.URL_MONGO,
@@ -61,13 +124,14 @@ test("POST user to database and check if all data are inserted", async () => {
   }
   // Insérer l'utilisateur dans la BD
 	const newUser = await User.create(user)
-
+  // Supprimer l'utilisateur de test.
+  const delUser = await User.deleteOne({email: newUser.email});
   setTimeout(async ()=>{
     request(app)
     //Récupérer l'utilisateur inséré avec son NAME
 		.get("/api/users/User1")
 		.expect(200)
-		.then((response) => {
+		.then(async (response) => {
 			
 			expect(Array.isArray(response.body)).toBeTruthy()
 			expect(response.body.length).toEqual(1)
@@ -80,12 +144,45 @@ test("POST user to database and check if all data are inserted", async () => {
 			expect(response.body[0].firstname).toBe(newUser.firstname)
 			expect(response.body[0].email).toBe(newUser.email)
 			expect(response.body[0].role).toBe(newUser.role)
+      
 		}).catch((ex)=>{})
-    // Supprimer l'utilisateur de test.
-    const delUser = await User.deleteOne({email: email});
+    
   },4000)
 })
 
+// Vérifier la connexion de l'utilisateur
+test("Vérifier la connexion de l'utilisateur", async () => {
+  const user = {
+    password: "taha1234",
+    email: "taha@gmail.com"
+  }
+  const result = request(app)
+      .post(baseUrl+"/login")
+      .send(user)
+      .expect(200);
+
+  const existingUser = await User.findOne({email: user.email});
+  const rs = await bcrypt.compare(user.password, existingUser.password);
+  expect(rs).toEqual(true)
+
+})
+it("Renvoie une erreur si le mot de passe est faux", async () => {
+  try {
+    await new User({ name: "sam",firstname:"toto", email: "test-jest@gmail.com", password: 'qwer213', role:"editor"}).save()
+    let result = await User.findOne({ email: "test-jest@gmail.com" })
+    let wrongPassword = "123456"
+    expect(wrongPassword).not.toEqual(result.password)
+    const delUser = await User.deleteOne({email: "test-jest@gmail.com"});
+  }
+  catch (err) {
+    throw new Error(err)
+  }
+
+})
+
+// Vérifier la modification de l'utilisateur
+
+// Vérifier la suppréssion de l'utilisateur
 // Fermer la connexion
 afterEach((done) => {
 	mongoose.connection.db.dropDatabase(() => {
