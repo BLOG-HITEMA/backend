@@ -1,1 +1,0 @@
-const { Article, joiSchema } = require('../models/article');
