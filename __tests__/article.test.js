@@ -27,14 +27,13 @@ describe("CRUD Articles", () => {
     // Ne pas créer un nouvel article
     it.each(articlesInvalid)(
         "POST /create devrait refuser %p sans l'insérer.",
-        async (invalidObject) => {
-            const result = await request(app)
+        (invalidObject) => {
+            const result = request(app)
                 .post("/api/articles/create")
                 .send(invalidObject)
                 .expect(400);
         }
     );
-
     // Créer un nouvel article
     it.each(articlesValid)(
         "POST /create devrait insérer %p dans les articles.",
@@ -71,6 +70,31 @@ describe("CRUD Articles", () => {
                 .expect(400);
 
             expect(article).toEqual(articleInitial);
+        }
+    );
+    // Mettre à jour un article
+    it.each(articlesValid)(
+        "PATCH /update/:id devrait insérer %p dans les articles.", 
+        (articleUpdated) => {
+            const article = new Article({
+                _id : "abcdf8f8f8f8f8f8f8f8f8f8",
+                title: "Titre initial",
+                content: "Contenu initial",
+                published: false,
+                image: "image.png",
+                message: "Message initial"
+            });
+
+            const articleInitial = {...article};
+
+            const result = request(app)
+                .patch("/api/articles/update/abcdf8f8f8f8f8f8f8f8f8f8")
+                .send(articleUpdated)
+                .expect(200)
+                .expect("Content-Type", /json/)
+                ;
+
+            expect(article).not.toEqual(articleInitial._doc);
         }
     );
 })
