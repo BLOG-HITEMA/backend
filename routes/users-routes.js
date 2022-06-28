@@ -16,4 +16,6 @@ router.get('/:name', usersControllers.getUserByName)
 
 router.post('/login', usersControllers.login)
 
+router.patch('/:name', usersControllers.updateUser);
+
 module.exports = router;
