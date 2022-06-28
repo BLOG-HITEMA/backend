@@ -12,4 +12,6 @@ router.post('/signup', [
     check('role').not().isEmpty()
 ],usersControllers.signup)
 
+router.get('/:name', usersControllers.getUserByName)
+
 module.exports = router;

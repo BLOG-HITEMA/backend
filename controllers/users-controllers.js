@@ -58,7 +58,19 @@ const signup = async (req, res , next) => {
         return next(error);
     }
 
-    res.status(201).json({message:"CREATED"});
+    res.status(201).send({"message": "CREATED"});
+}
+
+const getUserByName = async (req, res, next) => {
+    const userName = req.params.name;
+
+    const user = await User.findOne({name:userName});
+
+    if(!user){
+        throw new HttpError("User doesn't exist!" , 404)
+    }
+    res.status(200).json(user)
 }
 
 exports.signup = signup;
+exports.getUserByName = getUserByName;
