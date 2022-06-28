@@ -3,9 +3,9 @@ const bodyParser = require("body-parser")
 const cors = require('cors')
 const app = express();
 const articlesRoutes = require('./routes/articles-routes');
+require('dotenv').config();
 const usersRoutes = require('./routes/users-routes');
 const mongoose = require('mongoose');
-require('dotenv').config();
 
 const port = process.env.PORT;
 app.use(bodyParser.json())
