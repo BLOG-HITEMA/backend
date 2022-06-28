@@ -1,6 +1,7 @@
 const { Article } = require('../models/article');
 const { app } = require("../app");
 const request = require("supertest");
+const mongoose = require("mongoose");
 
 const articlesValid = [
     { title : "test title", content : "test content" }, 
@@ -23,29 +24,43 @@ const articlesInvalid = [
     { title : "test title", content : 234567 }, // 2 paramètres requis mais l'un n'est pas une string
 ];
 
+beforeEach((done) => {
+	mongoose.connect(
+		process.env.URL_MONGO,
+		{ useNewUrlParser: true },
+		() => done()
+	)
+})
+
+afterEach((done) => {
+	mongoose.connection.close(() => done())
+})
+
 describe("CRUD Articles", () => {
     // Ne pas créer un nouvel article
     it.each(articlesInvalid)(
         "POST /create devrait refuser %p sans l'insérer.",
-        (invalidObject) => {
-            const result = request(app)
+        async (invalidObject) => {
+            const result = await request(app)
                 .post("/api/articles/create")
                 .send(invalidObject)
-                .expect(400);
+                .expect(400)
+                .expect("Content-Type", /json/)
+            ;
         }
     );
     // Créer un nouvel article
     it.each(articlesValid)(
         "POST /create devrait insérer %p dans les articles.",
         
-        (article) => {
-            const result = request(app)
+        async (article) => {
+            const result = await request(app)
                 .post("/api/articles/create")
                 .send(article)
-                .expect(201)
-                .expect("Content-Type", /json/)
             ;
+            expect(201);
         }
+
     );
 
 
