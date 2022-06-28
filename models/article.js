@@ -3,7 +3,10 @@ const mongoose = require('mongoose');
 
 const joiSchema = Joi.object({
     title : Joi.string().min(2).max(255).required(),
-    content : Joi.number().required()
+    content : Joi.string().min(2).max(255).required(),
+    published : Joi.boolean(),
+    image : Joi.string().min(2).max(255),
+    message : Joi.string().min(2).max(255)
 });
 
 const schema = new mongoose.Schema({
