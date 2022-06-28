@@ -1,5 +1,6 @@
 const { Article, joiSchema } = require('../models/article');
 const User = require('../models/user');
+const { Journal } = require('../models/journal');
 const jwt = require('jsonwebtoken');
 
 const create = async (req, res) => {
@@ -72,8 +73,21 @@ const deleteArticle = async (req, res) => {
     });
 }
 
-const storeArticleInJournal = (req, res) => {
+const storeArticleInJournal = async (req, res) => {
+    const { idJournal, idArticle } = req.params;
 
+    const journal = await Journal.findById(idJournal);
+    const article = await Article.findByIdAndUpdate(idArticle, {journal: idJournal});
+
+    if (!journal) return res.status(404).send({message : "Le journal n'existe pas."});
+
+    if (!article) return res.status(404).send({message : "L'article n'existe pas."});
+
+    journal.articles.push(article);
+
+    await journal.save();
+
+    res.status(200).send("L'article a été ajouter au journal.");
 }
 
 const getArticlesByAuthor = async (req, res) => {
