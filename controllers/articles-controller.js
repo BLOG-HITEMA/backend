@@ -17,4 +17,24 @@ const create = async (req, res) => {
     res.status(201).send(article);
 }
 
-module.exports = { create };
+const update = async (req, res) => {
+    
+}
+
+const deleteArticle = (req, res) => {
+
+}
+
+const storeArticleInJournal = (req, res) => {
+
+}
+
+const getArticlesByAutor = (req, res) => {
+
+}
+
+const acceptArticle = (req, res) => {
+
+}
+
+module.exports = { create, update, deleteArticle, storeArticleInJournal, getArticlesByAutor, acceptArticle };
