@@ -1,3 +1,4 @@
+const { Article } = require('../models/article');
 const { app } = require("../app");
 const request = require("supertest");
 
@@ -45,6 +46,31 @@ describe("CRUD Articles", () => {
                 .expect(201)
                 .expect("Content-Type", /json/)
             ;
+        }
+    );
+
+
+    // Ne pas mettre à jour un article
+    it.each(articlesInvalid)(
+        "PATCH /update/:id ne devrait pas insérer %p dans les articles.", 
+        (articleUpdated) => {
+            const article = new Article({
+                _id : "abcdf8f8f8f8f8f8f8f8f8f8",
+                title: "Titre initial",
+                content: "Contenu initial",
+                published: false,
+                image: "image.png",
+                message: "Message initial"
+            });
+
+            const articleInitial = {...article};
+
+            const result = request(app)
+                .patch("/api/articles/update/abcdf8f8f8f8f8f8f8f8f8f8")
+                .send(articleUpdated)
+                .expect(400);
+
+            expect(article).toEqual(articleInitial);
         }
     );
 })
