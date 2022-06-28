@@ -23,13 +23,25 @@ describe("CRUD Articles", () => {
 
     // Créer un nouvel article
     it.each([
-        { title : "test title", content : "test content" },
+        { title : "test title", content : "test content" }, 
+        { title : "test title", content : "test content", image : "image.png" },
+        { title : "test title", content : "test content", image : "" },
+        { title : "test title", content : "test content", image : "image.png", published : true },
+        { title : "test title", content : "test content", image : "image.png", published : false },
+        { title : "test title", content : "test content", image : "image.png", published : false, message : "test message" },
+        { title : "test title", content : "test content", image : "image.png", published : true, message : "test message" },
+        { title : "test title", content : "test content", image : "image.png", published : true, message : "" },
+        { title : "test title", content : "test content", image : "image.png", published : false, message : "" },
     ])(
-    "POST /create devrait insérer %p. dans les articles.",
-    async () => {
-        const result = await request(app)
-            .post("/api/articles/create")
-            .expect(201);
-    }
-);
+        "POST /create devrait insérer %p dans les articles.",
+        
+        (article) => {
+            const result = request(app)
+                .post("/api/articles/create")
+                .send(article)
+                .expect(201)
+                .expect("Content-Type", /json/)
+            ;
+        }
+    );
 })
