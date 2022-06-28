@@ -5,7 +5,7 @@ const articleController = require('../controllers/articles-controller');
 
 router.post('/create', articleController.create);
 
-router.patch('/update', articleController.update);
+router.patch('/update/:id', articleController.update);
 
 router.delete("/delete/:id", articleController.deleteArticle);
 
