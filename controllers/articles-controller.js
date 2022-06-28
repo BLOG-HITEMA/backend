@@ -1,16 +1,21 @@
 const { Article, joiSchema } = require('../models/article');
 const User = require('../models/user');
+const jwt = require('jsonwebtoken');
 
 const create = async (req, res) => {
     const payload = req.body;
+    const token = req.body.token;
+
+    delete payload.token;
+
     const { error } = joiSchema.validate(payload);
     if (error) return res.status(400).send(error.details[0].message);
 
     let user = null;
     let article = null;
 
-    if (payload.token) {
-        const decoded = jwt.verify(payload.token, process.env.CLE_TOKEN);
+    if (token) {
+        const decoded = jwt.verify(token, process.env.CLE_TOKEN);
         user = await User.findById(decoded.id).exec()
             .then( async (data) => {
                 if (!data) {
@@ -25,7 +30,7 @@ const create = async (req, res) => {
     
                     await article.save();
                 }
-                
+
                 else {
                     article = new Article({
                         title: payload.title,
