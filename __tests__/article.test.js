@@ -127,28 +127,15 @@ describe("CRUD Articles", () => {
                 .expect("Content-Type", /json/)
             ;
 
-            console.log(result.body);
-
             expect(result.body).not.toEqual(articleInitial._doc);
-
-            // await Article.findByIdAndDelete("abcdf8f8f8f8f8f8f8f8f8f8");
         }
     );
 
 
     // Ne pas supprimer un article
     it("DELETE /delete/:id ne devrait pas supprimer un article.", 
-        () => {
-            const article = new Article({
-                _id : "abcdf8f8f8f8f8f8f8f8f8f8",
-                title: "Titre initial",
-                content: "Contenu initial",
-                published: false,
-                image: "image.png",
-                message: "Message initial"
-            });
-
-            const result = request(app)
+        async () => {
+            const result = await request(app)
                 .delete("/api/articles/delete/abcdf8f8f8f8f8f8f8f8f8f9")
                 .expect(404)
                 .expect("Content-Type", /json/);
@@ -158,17 +145,8 @@ describe("CRUD Articles", () => {
 
     // Supprimer un article
     it("DELETE /delete/:id devrait supprimer un article.", 
-        () => {
-            const article = new Article({
-                _id : "abcdf8f8f8f8f8f8f8f8f8f8",
-                title: "Titre initial",
-                content: "Contenu initial",
-                published: false,
-                image: "image.png",
-                message: "Message initial"
-            });
-          
-            const result = request(app)
+        async () => {
+            const result = await request(app)
                 .delete("/api/articles/delete/abcdf8f8f8f8f8f8f8f8f8f8")
                 .expect(200)
             ;
