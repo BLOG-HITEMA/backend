@@ -7,7 +7,8 @@ const mongoose = require("mongoose")
 const baseUrl = "/api/users"
 
 // Tester la route POST de user sans BD
-describe("Tester la route api/users/signup", () => {
+describe("Tester la route api/users", () => {
+  // 1) la route api/users/signup
   it("Doit ajouter et retourner un status 201", () => {
     const user = {
       name: "Deadpool",
@@ -69,9 +70,38 @@ describe("Tester la route api/users/signup", () => {
         .expect(422);
     }
   );
+
+  // 2) La route PATCH api/users/:name
+  it("Doit modifier et retourner un status 200", async () => {
+    let nameUnique = (Math.random() + 1).toString(36).substring(7);
+    const user = {
+      name: nameUnique,
+      firstname: "Deadool",
+      password: "secret1234"
+    }
+    user.password = await bcrypt.hash(user.password, 12);
+    const result = request(app)
+      .patch(baseUrl+"/admin")
+      .send(user)
+      .expect(200);
+  });
+  // 3) La route DELETE api/users/:name
+  it("Doit supprimer et retourner un status 200", async () => {
+    const userDeTest = await User.create({
+      name: "UserX",
+      firstname: "FirstnameX",
+      password: "secret1234",
+      email: "testXX@gmail.com",
+      role: "editor"
+    })
+    const result = request(app)
+      .delete(baseUrl+"/UserX")
+      .expect(200);
+    await userDeTest.delete();
+  });
 })
 
-// Se connecter à MONGO DB
+// Se connecter à MONGO DB avant chaque test qui concerne la BD
 beforeEach((done) => {
 	mongoose.connect(
 		process.env.URL_MONGO,
@@ -149,6 +179,10 @@ it("Renvoie une erreur si le mot de passe est faux", async () => {
   }
 
 })
+
+// Vérifier la modification de l'utilisateur
+
+// Vérifier la suppréssion de l'utilisateur
 // Fermer la connexion
 afterEach((done) => {
 	mongoose.connection.db.dropDatabase(() => {

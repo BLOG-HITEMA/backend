@@ -78,18 +78,17 @@ const updateUser = async (req, res, next) => {
     const {name, firstname, password} = req.body;
 
     const userToUpdate = await User.findOne({name: nom});
-    userToUpdate.firstname = firstname;
     let hashedPassword;
     try{
         hashedPassword = await bcrypt.hash(password, 12);
-
     }catch(err){
         const error = new HttpError(
             'Erreur lors de la création du compte, veuillez ressayer ultérieurement.',
             500
-        )
-        return next(error);
-    }
+            )
+            return next(error);
+        }
+    userToUpdate.firstname = firstname;
     userToUpdate.password = hashedPassword;
     userToUpdate.name = name;
     try {
