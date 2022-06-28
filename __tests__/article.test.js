@@ -36,6 +36,31 @@ afterEach((done) => {
 	mongoose.connection.close(() => done())
 })
 
+beforeAll(async() => {
+    mongoose.connect(
+		process.env.URL_MONGO,
+		{ useNewUrlParser: true }
+	)
+
+    const article = new Article({
+        _id : "abcdf8f8f8f8f8f8f8f8f8f8",
+        title: "Titre initial",
+        content: "Contenu initial",
+        published: false,
+        image: "image.png",
+        message: "Message initial"
+    });
+
+    await article.save();
+
+    mongoose.connection.close();
+});
+
+afterAll( async () => {
+    await Article.findByIdAndDelete("abcdf8f8f8f8f8f8f8f8f8f8");
+    // mongoose.connection.close(() => done())
+});
+
 describe("CRUD Articles", () => {
     // Ne pas créer un nouvel article
     it.each(articlesInvalid)(
@@ -67,7 +92,7 @@ describe("CRUD Articles", () => {
     // Ne pas mettre à jour un article
     it.each(articlesInvalid)(
         "PATCH /update/:id ne devrait pas insérer %p dans les articles.", 
-        (articleUpdated) => {
+        async (articleUpdated) => {
             const article = new Article({
                 _id : "abcdf8f8f8f8f8f8f8f8f8f8",
                 title: "Titre initial",
@@ -79,10 +104,12 @@ describe("CRUD Articles", () => {
 
             const articleInitial = {...article};
 
-            const result = request(app)
+            const result = await request(app)
                 .patch("/api/articles/update/abcdf8f8f8f8f8f8f8f8f8f8")
                 .send(articleUpdated)
-                .expect(400);
+                .expect(400)
+                .expect("Content-Type", /json/)
+            ;
 
             expect(article).toEqual(articleInitial);
         }
@@ -90,26 +117,21 @@ describe("CRUD Articles", () => {
     // Mettre à jour un article
     it.each(articlesValid)(
         "PATCH /update/:id devrait insérer %p dans les articles.", 
-        (articleUpdated) => {
-            const article = new Article({
-                _id : "abcdf8f8f8f8f8f8f8f8f8f8",
-                title: "Titre initial",
-                content: "Contenu initial",
-                published: false,
-                image: "image.png",
-                message: "Message initial"
-            });
+        async (articleUpdated) => {
+            const articleInitial = await Article.findById("abcdf8f8f8f8f8f8f8f8f8f8");
 
-            const articleInitial = {...article};
-
-            const result = request(app)
+            const result = await request(app)
                 .patch("/api/articles/update/abcdf8f8f8f8f8f8f8f8f8f8")
                 .send(articleUpdated)
                 .expect(200)
                 .expect("Content-Type", /json/)
-                ;
+            ;
 
-            expect(article).not.toEqual(articleInitial._doc);
+            console.log(result.body);
+
+            expect(result.body).not.toEqual(articleInitial._doc);
+
+            // await Article.findByIdAndDelete("abcdf8f8f8f8f8f8f8f8f8f8");
         }
     );
 
