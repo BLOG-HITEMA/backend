@@ -29,7 +29,7 @@ const storeArticleInJournal = (req, res) => {
 
 }
 
-const getArticlesByAutor = (req, res) => {
+const getArticlesByAuthor = (req, res) => {
 
 }
 
@@ -37,4 +37,4 @@ const acceptArticle = (req, res) => {
 
 }
 
-module.exports = { create, update, deleteArticle, storeArticleInJournal, getArticlesByAutor, acceptArticle };
+module.exports = { create, update, deleteArticle, storeArticleInJournal, getArticlesByAuthor, acceptArticle };
