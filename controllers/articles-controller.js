@@ -46,7 +46,28 @@ const getArticlesByAuthor = (req, res) => {
 }
 
 const acceptArticle = (req, res) => {
+    const { message } = req.body;
+    const accept = req.params.accept;
+    const id = req.params.idArticle;
 
+    if (accept != 0) {
+        Article.findByIdAndUpdate(id, {published: true, message: message}).exec()
+        .then( (data) => {
+            if (!data) return res.sendStatus(404).send({message : "L'article n'existe pas."});
+            res.status(200).send("Article publié.");
+        }).catch( (err) => {
+            res.status(500).send({message : "Erreur lors de la publication de l'article."});
+        } );
+    }
+    else {
+        Article.findByIdAndUpdate(id, {published: false, message: message}).exec()
+        .then( (data) => {
+            if (!data) return res.status(404).send({message : "L'article n'existe pas."});
+            res.status(200).send("Article refusé.");
+        }).catch( (err) => {
+            res.status(500).send({message : "Erreur lors de la publication de l'article."});
+        } );
+    }
 }
 
 module.exports = { create, update, deleteArticle, storeArticleInJournal, getArticlesByAuthor, acceptArticle };

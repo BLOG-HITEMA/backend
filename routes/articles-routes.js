@@ -13,6 +13,6 @@ router.post("/store/:idArticle/in/:idJournal", articleController.storeArticleInJ
 
 router.get("/articlesByAuthor/:id", articleController.getArticlesByAuthor);
 
-router.post("/accept/:id", articleController.acceptArticle);
+router.patch("/accept/:accept/:idArticle", articleController.acceptArticle);
 
 module.exports = router;
