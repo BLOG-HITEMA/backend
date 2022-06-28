@@ -1,16 +1,28 @@
 const { Article, joiSchema } = require('../models/article');
+const User = require('../models/user');
 
 const create = async (req, res) => {
     const payload = req.body;
     const { error } = joiSchema.validate(payload);
     if (error) return res.sendStatus(400).send(error.details[0].message);
 
+    let user = null;
+
+    // if (payload.token) {
+    //     const decoded = jwt.verify(payload.token, process.env.CLE_TOKEN);
+    //     // user = await User.findById(decoded.id);
+    //     user = await User.findById("62bafd1c8b3edd047ac35c7b");
+    // }
+
+    user = await User.findById("62bafd1c8b3edd047ac35c7b");
+
     const article = new Article({
         title: payload.title,
         content: payload.content,
         published: payload.published,
         image: payload.image,
-        message: payload.message
+        message: payload.message,
+        user: user._id
     });
 
     await article.save();
@@ -42,7 +54,15 @@ const storeArticleInJournal = (req, res) => {
 }
 
 const getArticlesByAuthor = (req, res) => {
-
+    const author = req.params.id;
+    console.log(Article.find());
+    // Article.find({user: author}).exec()
+    // .then( (data) => {
+    //     if (!data) return res.sendStatus(404).send({message : "Aucun article trouvé."});
+    //     res.status(200).send(data);
+    // }).catch( (err) => {
+    //     res.status(500).send({message : "Erreur lors de la récupération des articles."});
+    // } );
 }
 
 const acceptArticle = (req, res) => {
