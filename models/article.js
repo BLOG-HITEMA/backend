@@ -16,11 +16,11 @@ const schema = new mongoose.Schema({
     image: String,
     message: String,
     user: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.ObjectId,
         ref: 'User'
     },
     journal: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.ObjectId,
         ref: 'Journal'
     }
 });
