@@ -12,12 +12,14 @@ router.post('/signup', [
     check('role').not().isEmpty()
 ],usersControllers.signup)
 
-router.get('/:name', usersControllers.getUserByName)
+router.get('/:id', usersControllers.getUserById)
+
+router.get('/', usersControllers.getUsers)
 
 router.post('/login', usersControllers.login)
 
-router.patch('/:name', usersControllers.updateUser);
+router.patch('/:id', usersControllers.updateUser);
 
-router.delete('/:name', usersControllers.deleteUser);
+router.delete('/:id', usersControllers.deleteUser);
 
 module.exports = router;

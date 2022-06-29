@@ -7,53 +7,25 @@ const max_articles_number = process.env.MAX_ARTICLES_PER_PAGE;
 
 const create = async (req, res) => {
     const payload = req.body;
-    const token = req.body.token;
 
-    delete payload.token;
+    const user = req.userData;
 
     const { error } = joiSchema.validate(payload);
     if (error) return res.status(400).send({message : error.details[0].message});
 
-    let user = null;
-    let article = null;
+    const article = new Article({
+        title: payload.title,
+        content: payload.content,
+        published: payload.published,
+        image: payload.image,
+        message: payload.message,
+        user: user.id
+    });
 
-    if (token) {
-        const decoded = jwt.verify(token, process.env.CLE_TOKEN);
-        user = await User.findById(decoded.id).exec()
-            .then( async (data) => {
-                if (!data) {
-                    
-                    article = new Article({
-                        title: payload.title,
-                        content: payload.content,
-                        published: payload.published,
-                        image: payload.image,
-                        message: payload.message,
-                    });
-    
-                    await article.save();
-                }
+    await article.save();
 
-                else {
-                    article = new Article({
-                        title: payload.title,
-                        content: payload.content,
-                        published: payload.published,
-                        image: payload.image,
-                        message: payload.message,
-                        user: data._id
-                    });
-        
-                    await article.save();
-                }
-    
-            })
-        ;
+    return res.status(201).send(article);
 
-        return res.status(201).send(article);
-    }
-
-    res.status(400).send({message : "L'auteur n'a pas été préciser."});
 }
 
 const update = async (req, res) => {
