@@ -17,6 +17,7 @@ const getJournals = async (req, res, next) => {
 }
 
 const createJournal = async (req, res, next) => {
+    checkIfAuthor(req.userData.id);
     const errors = validationResult(req)
     if(!errors.isEmpty()){
         const error = new HttpError(
@@ -27,12 +28,84 @@ const createJournal = async (req, res, next) => {
     }
     const {title} = req.body;
 
-    let user;
+    let createdJournal;
     try {
-        user = await User.findById(req.userData.id);
+        createdJournal = new Journal({
+            title,
+            user:user
+        })
     } catch (err) {
         const error = new HttpError(
-            'La création du journal a échouée, resseyez utérieurement',
+            'La création du journal a échouée, ressayez utérieurement',
+            500
+        );
+        return next(error)
+    }
+    res.status(201).json(createdJournal)
+}
+
+const updateJournal = async (req, res, next) => {
+    const id = req.params.id;
+    checkIfAuthor(req.userData.id);
+    const newData = req.body;
+    let journal;
+    try {
+        journal = await Journal.findById(id);
+    } catch (err) {
+        const error = new HttpError(
+            'La modification du journal a échouée, résseyez utérieurement',
+            500
+        );
+        return next(error);
+    }
+    if(!journal){
+        const error = new HttpError(
+            "Le journal est introuvable.",
+            404
+        );
+        return next(error);
+    }
+    
+}
+const deleteJournal = async (req, res, next) => {
+    const id = req.params.id;
+    checkIfAuthor(req.userData.id);
+    const newData = req.body;
+    let journal;
+    try {
+        journal = await Journal.findById(id);
+    } catch (err) {
+        const error = new HttpError(
+            'La suppréssion du journal a échouée, résseyez utérieurement',
+            500
+        );
+        return next(error);
+    }
+    if(!journal){
+        const error = new HttpError(
+            "Le journal est introuvable.",
+            404
+        );
+        return next(error);
+    }
+    try {
+        await journal.delete();
+    } catch (err) {
+        const error = new HttpError(
+            'La suppréssion du journal a échouée, résseyez utérieurement',
+            500
+        );
+        return next(error);
+    }
+}
+
+const checkIfAuthor = async (id) => {
+    let user;
+    try {
+        user = await User.findById(id);
+    } catch (err) {
+        const error = new HttpError(
+            'La création du journal a échouée, résseyez utérieurement',
             500
         );
         return next(error);
@@ -51,23 +124,6 @@ const createJournal = async (req, res, next) => {
         );
         return next(error);
     }
-    try {
-        const createdJournal = new Journal({
-            title,
-            user:user
-        })
-    } catch (err) {
-        const error = new HttpError(
-            'La création du journal a échouée, ressayez utérieurement',
-            500
-        );
-        return next(error)
-    }
-    res.status(201).json(createdJournal)
-}
-
-const updateJournal = async (req, res, next) => {
-
 }
 exports.updateJournal = updateJournal;
 exports.getJournals = getJournals;
