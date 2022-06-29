@@ -3,12 +3,20 @@ const User = require('../models/user');
 const { Journal } = require('../models/journal');
 const jwt = require('jsonwebtoken');
 require("dotenv").config();
-const max_articles_number = process.env.MAX_ARTICLES_PER_PAGE;
+const max_articles_number = process.env.MAX_ARTICLES_PER_PAGE || 10;
 
 const create = async (req, res) => {
     const payload = req.body;
 
     const user = req.userData;
+
+    if(user.role=="editor"){
+        const error = new HttpError(
+            "Vous n'êtes pas autorisé pour créer un journal",
+            403
+        );
+        return next(error);
+    }
 
     const { error } = joiSchema.validate(payload);
     if (error) return res.status(400).send({message : error.details[0].message});
@@ -36,7 +44,7 @@ const update = async (req, res) => {
     const article = await Article.findByIdAndUpdate(req.params.id, payload);
     if (!article) return res.status(404).send({message : "L'article n'existe pas."});
 
-    res.status(200).send({ _id : article._id, ...payload});
+    res.status(200).send({ ...article._doc, ...payload});
 }
 
 const deleteArticle = async (req, res) => {
@@ -90,6 +98,22 @@ const getAll = async (req, res) => {
     res.status(200).send({articles, page, max_pages});
 }
 
+const search = async (req, res) => {
+    const page = parseInt(req.params.page) || 1;
+
+    const {search} = req.body;
+
+    let articles = (await Article.find());
+
+    articles = articles
+    .filter(e => e.title === search || e.content === search)
+    .splice((page - 1) * max_articles_number, max_articles_number * page);
+    
+    const max_pages = articles.length / max_articles_number;
+
+    res.status(200).send({articles, page, max_pages});
+}
+
 const getArticleById = async (req, res) => {
     const id = req.params.id;
 
@@ -125,4 +149,14 @@ const acceptArticle = (req, res) => {
     }
 }
 
-module.exports = { create, update, deleteArticle, storeArticleInJournal, getArticlesByAuthor, acceptArticle, getAll, getArticleById };
+module.exports = { 
+    create, 
+    update, 
+    deleteArticle, 
+    storeArticleInJournal, 
+    getArticlesByAuthor, 
+    acceptArticle, 
+    getAll, 
+    getArticleById,
+    search
+};

@@ -7,6 +7,7 @@ require('dotenv').config();
 const usersRoutes = require('./routes/users-routes');
 const journalsRoutes = require('./routes/journals-routes');
 const mongoose = require('mongoose');
+const HttpError = require('./models/http-error');
 
 const port = process.env.PORT;
 app.use(bodyParser.json())
