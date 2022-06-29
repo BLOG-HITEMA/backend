@@ -14,8 +14,10 @@ router.patch('/update/:id', articleController.update);
 
 router.delete("/delete/:id", articleController.deleteArticle);
 
-router.post("/store/:idArticle/in/:idJournal", articleController.storeArticleInJournal);
+router.get("/store/:idArticle/in/:idJournal", articleController.storeArticleInJournal);
 
 router.patch("/accept/:accept/:idArticle", articleController.acceptArticle);
+
+router.get("/all", articleController.getAll);
 
 module.exports = router;

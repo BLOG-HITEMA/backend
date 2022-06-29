@@ -1,6 +1,7 @@
 const { Article } = require('../models/article');
 const { app } = require("../app");
 const request = require("supertest");
+const mongoose = require("mongoose");
 
 const articlesValid = [
     { title : "test title", content : "test content" }, 
@@ -23,36 +24,75 @@ const articlesInvalid = [
     { title : "test title", content : 234567 }, // 2 paramètres requis mais l'un n'est pas une string
 ];
 
+beforeEach((done) => {
+	mongoose.connect(
+		process.env.URL_MONGO,
+		{ useNewUrlParser: true },
+		() => done()
+	)
+})
+
+afterEach((done) => {
+	mongoose.connection.close(() => done())
+})
+
+beforeAll(async() => {
+    mongoose.connect(
+		process.env.URL_MONGO,
+		{ useNewUrlParser: true }
+	)
+
+    const article = new Article({
+        _id : "abcdf8f8f8f8f8f8f8f8f8f8",
+        title: "Titre initial",
+        content: "Contenu initial",
+        published: false,
+        image: "image.png",
+        message: "Message initial"
+    });
+
+    await article.save();
+
+    mongoose.connection.close();
+});
+
+afterAll( async () => {
+    await Article.findByIdAndDelete("abcdf8f8f8f8f8f8f8f8f8f8");
+    // mongoose.connection.close(() => done())
+});
+
 describe("CRUD Articles", () => {
     // Ne pas créer un nouvel article
     it.each(articlesInvalid)(
         "POST /create devrait refuser %p sans l'insérer.",
-        (invalidObject) => {
-            const result = request(app)
+        async (invalidObject) => {
+            const result = await request(app)
                 .post("/api/articles/create")
                 .send(invalidObject)
-                .expect(400);
+                .expect(400)
+                .expect("Content-Type", /json/)
+            ;
         }
     );
     // Créer un nouvel article
     it.each(articlesValid)(
         "POST /create devrait insérer %p dans les articles.",
         
-        (article) => {
-            const result = request(app)
+        async (article) => {
+            const result = await request(app)
                 .post("/api/articles/create")
                 .send(article)
-                .expect(201)
-                .expect("Content-Type", /json/)
             ;
+            expect(201);
         }
+
     );
 
 
     // Ne pas mettre à jour un article
     it.each(articlesInvalid)(
         "PATCH /update/:id ne devrait pas insérer %p dans les articles.", 
-        (articleUpdated) => {
+        async (articleUpdated) => {
             const article = new Article({
                 _id : "abcdf8f8f8f8f8f8f8f8f8f8",
                 title: "Titre initial",
@@ -64,10 +104,12 @@ describe("CRUD Articles", () => {
 
             const articleInitial = {...article};
 
-            const result = request(app)
+            const result = await request(app)
                 .patch("/api/articles/update/abcdf8f8f8f8f8f8f8f8f8f8")
                 .send(articleUpdated)
-                .expect(400);
+                .expect(400)
+                .expect("Content-Type", /json/)
+            ;
 
             expect(article).toEqual(articleInitial);
         }
@@ -75,43 +117,25 @@ describe("CRUD Articles", () => {
     // Mettre à jour un article
     it.each(articlesValid)(
         "PATCH /update/:id devrait insérer %p dans les articles.", 
-        (articleUpdated) => {
-            const article = new Article({
-                _id : "abcdf8f8f8f8f8f8f8f8f8f8",
-                title: "Titre initial",
-                content: "Contenu initial",
-                published: false,
-                image: "image.png",
-                message: "Message initial"
-            });
+        async (articleUpdated) => {
+            const articleInitial = await Article.findById("abcdf8f8f8f8f8f8f8f8f8f8");
 
-            const articleInitial = {...article};
-
-            const result = request(app)
+            const result = await request(app)
                 .patch("/api/articles/update/abcdf8f8f8f8f8f8f8f8f8f8")
                 .send(articleUpdated)
                 .expect(200)
                 .expect("Content-Type", /json/)
-                ;
+            ;
 
-            expect(article).not.toEqual(articleInitial._doc);
+            expect(result.body).not.toEqual(articleInitial._doc);
         }
     );
 
 
     // Ne pas supprimer un article
     it("DELETE /delete/:id ne devrait pas supprimer un article.", 
-        () => {
-            const article = new Article({
-                _id : "abcdf8f8f8f8f8f8f8f8f8f8",
-                title: "Titre initial",
-                content: "Contenu initial",
-                published: false,
-                image: "image.png",
-                message: "Message initial"
-            });
-
-            const result = request(app)
+        async () => {
+            const result = await request(app)
                 .delete("/api/articles/delete/abcdf8f8f8f8f8f8f8f8f8f9")
                 .expect(404)
                 .expect("Content-Type", /json/);
@@ -121,17 +145,8 @@ describe("CRUD Articles", () => {
 
     // Supprimer un article
     it("DELETE /delete/:id devrait supprimer un article.", 
-        () => {
-            const article = new Article({
-                _id : "abcdf8f8f8f8f8f8f8f8f8f8",
-                title: "Titre initial",
-                content: "Contenu initial",
-                published: false,
-                image: "image.png",
-                message: "Message initial"
-            });
-          
-            const result = request(app)
+        async () => {
+            const result = await request(app)
                 .delete("/api/articles/delete/abcdf8f8f8f8f8f8f8f8f8f8")
                 .expect(200)
             ;
