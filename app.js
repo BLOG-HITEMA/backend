@@ -5,6 +5,7 @@ const app = express();
 const articlesRoutes = require('./routes/articles-routes');
 require('dotenv').config();
 const usersRoutes = require('./routes/users-routes');
+const journalsRoutes = require('./routes/journals-routes');
 const mongoose = require('mongoose');
 
 const port = process.env.PORT;
@@ -13,7 +14,8 @@ app.use(cors());
 
 // Les routes de base (Articles & Users)
 app.use("/api/articles", articlesRoutes);
-app.use('/api/users', usersRoutes) 
+app.use('/api/users', usersRoutes); 
+app.use('/api/journals', journalsRoutes); 
 
 if(process.env.NODE_ENV !== "test"){
     // Essayer de se connecter à la BD MONGO
