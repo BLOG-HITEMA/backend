@@ -116,6 +116,16 @@ const getAll = async (req, res) => {
     res.status(200).send(articles);
 }
 
+const getArticleById = async (req, res) => {
+    const id = req.params.id;
+
+    const article = await Article.findById(id);
+
+    if (!article) return res.status(404).send({message : "L'article n'existe pas."});
+
+    res.status(200).send(article);
+}
+
 const acceptArticle = (req, res) => {
     const { message } = req.body;
     const accept = req.params.accept;
@@ -141,4 +151,4 @@ const acceptArticle = (req, res) => {
     }
 }
 
-module.exports = { create, update, deleteArticle, storeArticleInJournal, getArticlesByAuthor, acceptArticle, getAll };
+module.exports = { create, update, deleteArticle, storeArticleInJournal, getArticlesByAuthor, acceptArticle, getAll, getArticleById };
