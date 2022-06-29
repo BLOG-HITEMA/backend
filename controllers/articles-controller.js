@@ -111,9 +111,11 @@ const getAll = async (req, res) => {
 
     let articles = (await Article.find());
 
+    const max_pages = articles.length / max_articles_number;
+
     articles = articles.splice((page - 1) * max_articles_number, max_articles_number * page);
 
-    res.status(200).send(articles);
+    res.status(200).send({articles, page, max_pages});
 }
 
 const getArticleById = async (req, res) => {
