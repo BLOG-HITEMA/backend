@@ -9,9 +9,13 @@ const journalsRoutes = require('./routes/journals-routes');
 const mongoose = require('mongoose');
 const HttpError = require('./models/http-error');
 
-const port = process.env.PORT;
 app.use(bodyParser.json())
-app.use(cors());
+const corsOption = {
+    exposedHeaders: "Authorization"
+}
+app.use(cors(corsOption));
+
+const port = process.env.PORT;
 
 app.use((req, res, next) => {
     res.setHeader('Access-Controll-Allow-Origin', '*');
