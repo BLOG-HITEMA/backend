@@ -15,9 +15,21 @@ const getJournals = async (req, res, next) => {
     }
     res.status(200).json(journals);
 }
+const getJournalById = async (req, res, next) => {
+    const id = req.params.id;
 
+    const journal = await Journal.findOne({_id:id});
+
+    if(!journal){
+        throw new HttpError("Journal n'existe pas!" , 404)
+    }
+    res.status(200).json(journal)
+}
 const createJournal = async (req, res, next) => {
-    checkIfAuthor(req.userData.id);
+    const role = await getUserRole(req.userData.id);
+    if(role == "author"){
+        return res.status(403).send({"message": "Vous n'êtes pas autorisé!"})
+    }
     const errors = validationResult(req)
     if(!errors.isEmpty()){
         const error = new HttpError(
@@ -32,8 +44,9 @@ const createJournal = async (req, res, next) => {
     try {
         createdJournal = new Journal({
             title,
-            user:user
+            user:req.userData.id
         })
+        await createdJournal.save();
     } catch (err) {
         const error = new HttpError(
             'La création du journal a échouée, ressayez utérieurement',
@@ -43,10 +56,12 @@ const createJournal = async (req, res, next) => {
     }
     res.status(201).json(createdJournal)
 }
-
 const updateJournal = async (req, res, next) => {
+    const role = await getUserRole(req.userData.id);
+    if(role == "author"){
+        return res.status(403).send({"message": "Vous n'êtes pas autorisé!"})
+    }
     const id = req.params.id;
-    checkIfAuthor(req.userData.id);
     const newData = req.body;
     let journal;
     try {
@@ -65,18 +80,31 @@ const updateJournal = async (req, res, next) => {
         );
         return next(error);
     }
-    
+    try {
+        journal.title = newData.title;
+        journal.articles = newData.articles;
+        journal.save()
+    } catch (err) {
+        const error = new HttpError(
+            'La modification du journal a échouée, résseyez utérieurement',
+            500
+        );
+        return next(error);
+    }
+    res.status(201).json(journal)
 }
 const deleteJournal = async (req, res, next) => {
+    const role = await getUserRole(req.userData.id);
+    if(role == "author"){
+        return res.status(403).send({"message": "Vous n'êtes pas autorisé!"})
+    }
     const id = req.params.id;
-    checkIfAuthor(req.userData.id);
-    const newData = req.body;
     let journal;
     try {
         journal = await Journal.findById(id);
     } catch (err) {
         const error = new HttpError(
-            'La suppréssion du journal a échouée, résseyez utérieurement',
+            'La suppression du journal a échouée, résseyez utérieurement',
             500
         );
         return next(error);
@@ -97,34 +125,23 @@ const deleteJournal = async (req, res, next) => {
         );
         return next(error);
     }
-}
+    res.status(200).json("Journal bien supprimé.")
 
-const checkIfAuthor = async (id) => {
+}
+const getUserRole= async (id) => {
     let user;
     try {
         user = await User.findById(id);
     } catch (err) {
-        const error = new HttpError(
-            'La création du journal a échouée, résseyez utérieurement',
-            500
-        );
-        return next(error);
+        console.log('La création du journal a échouée, réessayez utérieurement')
     }
     if(!user){
-        const error = new HttpError(
-            "L'utilisateur est introuvable.",
-            404
-        );
-        return next(error);
+        console.log("L'utilisateur est introuvable.");
     }
-    if(user.role=="author"){
-        const error = new HttpError(
-            "Vous n'êtes pas autorisé pour créer un journal",
-            403
-        );
-        return next(error);
-    }
+    return user.role;
 }
-exports.updateJournal = updateJournal;
 exports.getJournals = getJournals;
+exports.getJournalById = getJournalById;
 exports.createJournal = createJournal;
+exports.updateJournal = updateJournal;
+exports.deleteJournal = deleteJournal;

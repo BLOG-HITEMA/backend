@@ -27,7 +27,6 @@ app.use((req, res, next) => {
 
     next();
 })
-
 // Les routes de base (Articles & Users)
 app.use("/api/articles", articlesRoutes);
 app.use('/api/users', usersRoutes); 

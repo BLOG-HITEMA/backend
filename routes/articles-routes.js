@@ -12,7 +12,7 @@ router.get("/search/:page", articleController.search);
 
 router.get("/:id", articleController.getArticleById);
 
-// router.get("/journal/:idJournal", articleController.getArticlesByJournal);
+// router.get("/journal/:idJournal", articleController.getArticlesOfJournal);
 
 
 router.use(checkAuth);
