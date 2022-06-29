@@ -87,15 +87,17 @@ const getArticlesByAuthor = async (req, res) => {
 }
 
 const getAll = async (req, res) => {
-    const page = parseInt(req.params.page) || 1;
+    // const page = parseInt(req.params.page) || 1;
 
-    let articles = (await Article.find());
+    let articles = await Article.find();
 
-    const max_pages = articles.length / max_articles_number;
+    // const max_pages = articles.length / max_articles_number;
 
-    articles = articles.splice((page - 1) * max_articles_number, max_articles_number * page);
+    // articles = articles.splice((page - 1) * max_articles_number, max_articles_number * page);
 
-    res.status(200).send({articles, page, max_pages});
+    // res.status(200).send({articles, page, max_pages});
+
+    res.status(200).send(articles);
 }
 
 const search = async (req, res) => {
