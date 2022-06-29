@@ -2,6 +2,7 @@ const { Article, joiSchema } = require('../models/article');
 const User = require('../models/user');
 const { Journal } = require('../models/journal');
 const jwt = require('jsonwebtoken');
+require("dotenv").config();
 const max_articles_number = process.env.MAX_ARTICLES_PER_PAGE;
 
 const create = async (req, res) => {
@@ -108,7 +109,9 @@ const getArticlesByAuthor = async (req, res) => {
 const getAll = async (req, res) => {
     const page = parseInt(req.params.page) || 1;
 
-    const articles = (await Article.find());
+    let articles = (await Article.find());
+
+    articles = articles.splice((page - 1) * max_articles_number, max_articles_number * page);
 
     res.status(200).send(articles);
 }
