@@ -1,6 +1,6 @@
 const { Article, joiSchema } = require('../models/article');
 const User = require('../models/user');
-const { Journal } = require('../models/journal');
+const Journal = require('../models/journal');
 const jwt = require('jsonwebtoken');
 const HttpError = require('../models/http-error');
 
