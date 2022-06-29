@@ -16,7 +16,7 @@ Et ensuite installer les dependencies
 ```bash
   npm install
 ```
-Il va falloir créer un fichier `.env` dans la racine du projet et contient :
+Il va falloir créer un fichier `.env` dans la racine du projet et qui contient :
 ```bash
   CLE_TOKEN= `Mettez-ici ce que vous voulez`
   PORT=3001
@@ -25,4 +25,9 @@ Il va falloir créer un fichier `.env` dans la racine du projet et contient :
 Et ensuite vous pouvez lancer le backend avec la commande
 ```bash
   npm start
+```
+
+Vous trouverez la document de l'API sur ce lien :
+```bash
+  https://www.notion.so/Documentation-Back-ea9e71baa73e47bda5cb595f86037159
 ```
