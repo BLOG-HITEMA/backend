@@ -151,6 +151,20 @@ const acceptArticle = (req, res, next) => {
     }
 }
 
+const getArticlesByJournal = async (req, res, next) => {
+    const journalID = req.params.idJournal;
+
+    const journal = await Journal.findById(journalID);
+
+    if (!journal) return res.status(404).send({message : "Le journal n'existe pas."});
+
+    const articles = await Article.find({journal : journalID});
+
+    if (!articles) return res.status(404).send({message : "Aucun article n'a été trouvé."});
+    
+    res.status(200).send(articles);
+}
+
 const checkIfEditor = async (id, next) => {
     let user;
     try {
@@ -187,5 +201,6 @@ module.exports = {
     acceptArticle, 
     getAll, 
     getArticleById,
-    search
+    search,
+    getArticlesByJournal
 };
