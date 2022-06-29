@@ -4,20 +4,27 @@ const router = express.Router();
 const articleController = require('../controllers/articles-controller');
 const checkAuth = require('../middleware/check-auth');
 
-router.get("/articlesByAuthor/:id", articleController.getArticlesByAuthor);
+router.get("/author/:id", articleController.getArticlesByAuthor);
+
+router.get("/", articleController.getAll);
+
+router.get("/search/:page/:search", articleController.search);
+
+router.get("/:id", articleController.getArticleById);
+
 
 router.use(checkAuth);
 
-router.post('/create', articleController.create);
 
-router.patch('/update/:id', articleController.update);
+router.post('/', articleController.create);
 
-router.delete("/delete/:id", articleController.deleteArticle);
+router.patch('/:id', articleController.update);
 
-router.get("/store/:idArticle/in/:idJournal", articleController.storeArticleInJournal);
+router.delete("/:id", articleController.deleteArticle);
+
+router.post("/store/:idArticle/in/:idJournal", articleController.storeArticleInJournal);
 
 router.patch("/accept/:accept/:idArticle", articleController.acceptArticle);
 
-router.get("/all", articleController.getAll);
 
 module.exports = router;
