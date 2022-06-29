@@ -10,7 +10,7 @@ const max_articles_number = process.env.MAX_ARTICLES_PER_PAGE || 10;
 const create = async (req, res, next) => {
     const payload = req.body;
 
-    checkIfEditor(req.userData.id);
+    checkIfEditor(req.userData.id, next);
 
     const { error } = joiSchema.validate(payload);
     if (error) return res.status(400).send({message : error.details[0].message});
@@ -30,8 +30,8 @@ const create = async (req, res, next) => {
 
 }
 
-const update = async (req, res) => {
-    checkIfEditor(req.userData.id);
+const update = async (req, res, next) => {
+    checkIfEditor(req.userData.id, next);
     
     const payload = req.body;
     const { error } = joiSchema.validate(payload);
@@ -43,8 +43,8 @@ const update = async (req, res) => {
     res.status(200).send({ ...article._doc, ...payload});
 }
 
-const deleteArticle = async (req, res) => {
-    checkIfEditor(req.userData.id);
+const deleteArticle = async (req, res, next) => {
+    checkIfEditor(req.userData.id, next);
 
     const article = await Article.findByIdAndDelete(req.params.id).exec()
     .then( (data) => {
@@ -53,8 +53,8 @@ const deleteArticle = async (req, res) => {
     });
 }
 
-const storeArticleInJournal = async (req, res) => {
-    checkIfEditor(req.userData.id);
+const storeArticleInJournal = async (req, res, next) => {
+    checkIfEditor(req.userData.id, next);
 
     const { idJournal, idArticle } = req.params;
 
@@ -72,7 +72,7 @@ const storeArticleInJournal = async (req, res) => {
     res.status(200).send("L'article a été ajouter au journal.");
 }
 
-const getArticlesByAuthor = async (req, res) => {
+const getArticlesByAuthor = async (req, res, next) => {
     const author = req.params.id;
 
     const user = await User.findById(author);
@@ -86,7 +86,7 @@ const getArticlesByAuthor = async (req, res) => {
     res.status(200).send(articles);
 }
 
-const getAll = async (req, res) => {
+const getAll = async (req, res, next) => {
     // const page = parseInt(req.params.page) || 1;
 
     let articles = await Article.find();
@@ -100,7 +100,7 @@ const getAll = async (req, res) => {
     res.status(200).send(articles);
 }
 
-const search = async (req, res) => {
+const search = async (req, res, next) => {
     const page = parseInt(req.params.page) || 1;
 
     const {search} = req.body;
@@ -116,7 +116,7 @@ const search = async (req, res) => {
     res.status(200).send({articles, page, max_pages});
 }
 
-const getArticleById = async (req, res) => {
+const getArticleById = async (req, res, next) => {
     const id = req.params.id;
 
     const article = await Article.findById(id);
@@ -126,7 +126,7 @@ const getArticleById = async (req, res) => {
     res.status(200).send(article);
 }
 
-const acceptArticle = (req, res) => {
+const acceptArticle = (req, res, next) => {
     const { message } = req.body;
     const accept = req.params.accept;
     const id = req.params.idArticle;
@@ -151,7 +151,7 @@ const acceptArticle = (req, res) => {
     }
 }
 
-const checkIfEditor = async (id) => {
+const checkIfEditor = async (id, next) => {
     let user;
     try {
         user = await User.findById(id);
