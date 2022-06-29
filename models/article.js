@@ -5,7 +5,7 @@ const joiSchema = Joi.object({
     title : Joi.string().min(2).max(255).required(),
     content : Joi.string().min(2).max(255).required(),
     published : Joi.boolean(),
-    image : Joi.string().optional().allow('').min(2).max(255),
+    image : Joi.string().optional().allow('').min(2),
     message : Joi.string().optional().allow('').min(2).max(255)
 });
 

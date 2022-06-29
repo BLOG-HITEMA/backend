@@ -2,56 +2,56 @@ const { Article, joiSchema } = require('../models/article');
 const User = require('../models/user');
 const { Journal } = require('../models/journal');
 const jwt = require('jsonwebtoken');
+const HttpError = require('../models/http-error');
 
-const create = async (req, res) => {
+require("dotenv").config();
+const max_articles_number = process.env.MAX_ARTICLES_PER_PAGE || 10;
+
+const create = async (req, res, next) => {
     const payload = req.body;
-    const token = req.body.token;
 
-    delete payload.token;
+    let user;
+
+    try {
+        user = await User.findById(req.userData.id);
+    } catch (err) {
+        const error = new HttpError(
+            'La création du journal a échouée, resseyez utérieurement',
+            500
+        );
+        return next(error);
+    }
+    if(!user){
+        const error = new HttpError(
+            "L'utilisateur est introuvable.",
+            404
+        );
+        return next(error);
+    }
+    if(user.role=="editor"){
+        const error = new HttpError(
+            "Vous n'êtes pas autorisé pour créer un journal",
+            403
+        );
+        return next(error);
+    }
 
     const { error } = joiSchema.validate(payload);
     if (error) return res.status(400).send({message : error.details[0].message});
 
-    let user = null;
-    let article = null;
+    const article = new Article({
+        title: payload.title,
+        content: payload.content,
+        published: payload.published,
+        image: payload.image,
+        message: payload.message,
+        user: user._id
+    });
 
-    if (token) {
-        const decoded = jwt.verify(token, process.env.CLE_TOKEN);
-        user = await User.findById(decoded.id).exec()
-            .then( async (data) => {
-                if (!data) {
-                    
-                    article = new Article({
-                        title: payload.title,
-                        content: payload.content,
-                        published: payload.published,
-                        image: payload.image,
-                        message: payload.message,
-                    });
-    
-                    await article.save();
-                }
+    await article.save();
 
-                else {
-                    article = new Article({
-                        title: payload.title,
-                        content: payload.content,
-                        published: payload.published,
-                        image: payload.image,
-                        message: payload.message,
-                        user: data._id
-                    });
-        
-                    await article.save();
-                }
-    
-            })
-        ;
+    return res.status(201).send(article);
 
-        return res.status(201).send(article);
-    }
-
-    res.status(400).send({message : "L'auteur n'a pas été préciser."});
 }
 
 const update = async (req, res) => {
@@ -62,7 +62,7 @@ const update = async (req, res) => {
     const article = await Article.findByIdAndUpdate(req.params.id, payload);
     if (!article) return res.status(404).send({message : "L'article n'existe pas."});
 
-    res.status(200).send({ _id : article._id, ...payload});
+    res.status(200).send({ ...article._doc, ...payload});
 }
 
 const deleteArticle = async (req, res) => {
@@ -105,8 +105,43 @@ const getArticlesByAuthor = async (req, res) => {
 }
 
 const getAll = async (req, res) => {
-    const articles = await Article.find();
-    return articles;
+    // const page = parseInt(req.params.page) || 1;
+
+    let articles = await Article.find();
+
+    // const max_pages = articles.length / max_articles_number;
+
+    // articles = articles.splice((page - 1) * max_articles_number, max_articles_number * page);
+
+    // res.status(200).send({articles, page, max_pages});
+
+    res.status(200).send(articles);
+}
+
+const search = async (req, res) => {
+    const page = parseInt(req.params.page) || 1;
+
+    const {search} = req.body;
+
+    let articles = (await Article.find());
+
+    articles = articles
+    .filter(e => e.title === search || e.content === search)
+    .splice((page - 1) * max_articles_number, max_articles_number * page);
+    
+    const max_pages = articles.length / max_articles_number;
+
+    res.status(200).send({articles, page, max_pages});
+}
+
+const getArticleById = async (req, res) => {
+    const id = req.params.id;
+
+    const article = await Article.findById(id);
+
+    if (!article) return res.status(404).send({message : "L'article n'existe pas."});
+
+    res.status(200).send(article);
 }
 
 const acceptArticle = (req, res) => {
@@ -134,4 +169,14 @@ const acceptArticle = (req, res) => {
     }
 }
 
-module.exports = { create, update, deleteArticle, storeArticleInJournal, getArticlesByAuthor, acceptArticle, getAll };
+module.exports = { 
+    create, 
+    update, 
+    deleteArticle, 
+    storeArticleInJournal, 
+    getArticlesByAuthor, 
+    acceptArticle, 
+    getAll, 
+    getArticleById,
+    search
+};

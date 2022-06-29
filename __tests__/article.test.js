@@ -24,18 +24,6 @@ const articlesInvalid = [
     { title : "test title", content : 234567 }, // 2 paramètres requis mais l'un n'est pas une string
 ];
 
-beforeEach((done) => {
-	mongoose.connect(
-		process.env.URL_MONGO,
-		{ useNewUrlParser: true },
-		() => done()
-	)
-})
-
-afterEach((done) => {
-	mongoose.connection.close(() => done())
-})
-
 beforeAll(async() => {
     mongoose.connect(
 		process.env.URL_MONGO,
@@ -56,10 +44,14 @@ beforeAll(async() => {
     mongoose.connection.close();
 });
 
-afterAll( async () => {
-    await Article.findByIdAndDelete("abcdf8f8f8f8f8f8f8f8f8f8");
-    // mongoose.connection.close(() => done())
-});
+beforeEach((done) => {
+	mongoose.connect(
+		process.env.URL_MONGO,
+		{ useNewUrlParser: true },
+		() => done()
+	)
+})
+
 
 describe("CRUD Articles", () => {
     // Ne pas créer un nouvel article
@@ -153,3 +145,13 @@ describe("CRUD Articles", () => {
         }
     );
 })
+
+
+afterEach((done) => {
+	mongoose.connection.close(() => done())
+})
+
+afterAll( async () => {
+    await Article.findByIdAndDelete("abcdf8f8f8f8f8f8f8f8f8f8");
+    // mongoose.connection.close(() => done())
+});
