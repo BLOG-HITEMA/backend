@@ -6,9 +6,14 @@ const journalsControllers = require('../controllers/journals-controllers')
 
 router.get('/', journalsControllers.getJournals)
 
+router.use(checkAuth);
 
 router.post('/', [
     check('title').not().isEmpty()
 ], journalsControllers.createJournal)
+
+router.patch('/:id', journalsControllers.updateJournal)
+
+router.delete('/:id', journalsControllers.updateJournal)
 
 module.exports = router;
