@@ -2,14 +2,32 @@ const { Article, joiSchema } = require('../models/article');
 const User = require('../models/user');
 const { Journal } = require('../models/journal');
 const jwt = require('jsonwebtoken');
+const HttpError = require('../models/http-error');
+
 require("dotenv").config();
 const max_articles_number = process.env.MAX_ARTICLES_PER_PAGE || 10;
 
-const create = async (req, res) => {
+const create = async (req, res, next) => {
     const payload = req.body;
 
-    const user = req.userData;
+    let user;
 
+    try {
+        user = await User.findById(req.userData.id);
+    } catch (err) {
+        const error = new HttpError(
+            'La création du journal a échouée, resseyez utérieurement',
+            500
+        );
+        return next(error);
+    }
+    if(!user){
+        const error = new HttpError(
+            "L'utilisateur est introuvable.",
+            404
+        );
+        return next(error);
+    }
     if(user.role=="editor"){
         const error = new HttpError(
             "Vous n'êtes pas autorisé pour créer un journal",
@@ -27,7 +45,7 @@ const create = async (req, res) => {
         published: payload.published,
         image: payload.image,
         message: payload.message,
-        user: user.id
+        user: user._id
     });
 
     await article.save();
