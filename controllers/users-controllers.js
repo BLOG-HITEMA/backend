@@ -3,6 +3,7 @@ const HttpError = require('../models/http-error');
 const User = require('../models/user');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { restart } = require('nodemon');
 
 const signup = async (req, res , next) => {
     const errors = validationResult(req)
@@ -189,6 +190,31 @@ const login = async (req, res, next) => {
     })
 }
 
+const reconnect = async (req, res, next) => {
+    var userData;
+    try{
+        const token = req.headers.authorization.split(' ')[1]; // Authorization: 'Bearer TOKEN'
+        if(!token){
+            const error = new HttpError("Pas de token!",401)
+            return next(error)
+        }
+        const decodedToken = jwt.verify(token, process.env.CLE_TOKEN);
+        userData = await User.findOne({_id: decodedToken.id});
+        if(!userData){
+            const error = HttpError("Utilisateur n'existe pas!", 404);
+            return next(error)
+        }
+    }catch(err){
+        const error = new HttpError(
+            'Pas de TOKEN!',
+            401
+        )
+        return next(error);
+    }
+    res.status(200).json(userData);
+}
+
+exports.reconnect = reconnect;
 exports.getUsers = getUsers;
 exports.getUserById = getUserById;
 exports.updateUser = updateUser;
