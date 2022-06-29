@@ -151,7 +151,7 @@ const acceptArticle = (req, res, next) => {
     }
 }
 
-const getArticlesByJournal = async (req, res, next) => {
+const getArticlesOfJournal = async (req, res, next) => {
     const journalID = req.params.idJournal;
 
     const journal = await Journal.findById(journalID);
@@ -202,5 +202,5 @@ module.exports = {
     getAll, 
     getArticleById,
     search,
-    getArticlesByJournal
+    getArticlesOfJournal
 };
