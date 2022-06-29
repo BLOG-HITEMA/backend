@@ -1,16 +1,17 @@
 const { Article, joiSchema } = require('../models/article');
 const User = require('../models/user');
 const Journal = require('../models/journal');
-const jwt = require('jsonwebtoken');
-const HttpError = require('../models/http-error');
 
 require("dotenv").config();
 const max_articles_number = process.env.MAX_ARTICLES_PER_PAGE || 10;
 
 const create = async (req, res, next) => {
-    const payload = req.body;
+    const role = await getUserRole(req.userData.id);
+    if(role == "editor"){
+        return res.status(403).send({"message": "Vous n'êtes pas autorisé!"})
+    }
 
-    checkIfEditor(req.userData.id, next);
+    const payload = req.body;
 
     const { error } = joiSchema.validate(payload);
     if (error) return res.status(400).send({message : error.details[0].message});
@@ -31,7 +32,10 @@ const create = async (req, res, next) => {
 }
 
 const update = async (req, res, next) => {
-    checkIfEditor(req.userData.id, next);
+    const role = await getUserRole(req.userData.id);
+    if(role == "editor"){
+        return res.status(403).send({"message": "Vous n'êtes pas autorisé!"})
+    }
     
     const payload = req.body;
     const { error } = joiSchema.validate(payload);
@@ -44,7 +48,10 @@ const update = async (req, res, next) => {
 }
 
 const deleteArticle = async (req, res, next) => {
-    checkIfEditor(req.userData.id, next);
+    const role = await getUserRole(req.userData.id);
+    if(role == "editor"){
+        return res.status(403).send({"message": "Vous n'êtes pas autorisé!"})
+    }
 
     const article = await Article.findByIdAndDelete(req.params.id).exec()
     .then( (data) => {
@@ -54,7 +61,10 @@ const deleteArticle = async (req, res, next) => {
 }
 
 const storeArticleInJournal = async (req, res, next) => {
-    checkIfEditor(req.userData.id, next);
+    const role = await getUserRole(req.userData.id);
+    if(role == "editor"){
+        return res.status(403).send({"message": "Vous n'êtes pas autorisé!"})
+    }
 
     const { idJournal, idArticle } = req.params;
 
@@ -151,7 +161,7 @@ const acceptArticle = (req, res, next) => {
     }
 }
 
-const getArticlesByJournal = async (req, res, next) => {
+const getArticlesOfJournal = async (req, res, next) => {
     const journalID = req.params.idJournal;
 
     const journal = await Journal.findById(journalID);
@@ -165,31 +175,17 @@ const getArticlesByJournal = async (req, res, next) => {
     res.status(200).send(articles);
 }
 
-const checkIfEditor = async (id, next) => {
+const getUserRole= async (id) => {
     let user;
     try {
         user = await User.findById(id);
     } catch (err) {
-        const error = new HttpError(
-            'La création de l\'article a échouée, réessayez utérieurement',
-            500
-        );
-        return next(error);
+        console.log('La création du d\'article a échouée, réessayez utérieurement')
     }
     if(!user){
-        const error = new HttpError(
-            "L'utilisateur est introuvable.",
-            404
-        );
-        return next(error);
+        console.log("L'utilisateur est introuvable.");
     }
-    if(user.role=="editor"){
-        const error = new HttpError(
-            "Vous n'êtes pas autorisé pour créer un article",
-            403
-        );
-        return next(error);
-    }
+    return user.role;
 }
 
 module.exports = { 
@@ -202,5 +198,5 @@ module.exports = {
     getAll, 
     getArticleById,
     search,
-    getArticlesByJournal
+    getArticlesOfJournal
 };
