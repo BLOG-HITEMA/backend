@@ -9,17 +9,18 @@ module.exports = (req, res, next) => {
     try{
         const token = req.headers.authorization.split(' ')[1]; // Authorization: 'Bearer TOKEN'
         if(!token){
-            throw new Error('Athentication failed!');
+            const error = HttpError("Pas de token!",401)
+            return next(error)
         }
         const decodedToken = jwt.verify(token, process.env.CLE_TOKEN);
         req.userData = {
-            id : decodedToken.userId,
+            id : decodedToken.id,
             email: decodedToken.email
         };
         next();
     }catch(err){
         const error = new HttpError(
-            'Authentication failed!',
+            'Pas de TOKEN!',
             403
         )
         return next(error);
