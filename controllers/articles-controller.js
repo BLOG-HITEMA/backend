@@ -10,31 +10,7 @@ const max_articles_number = process.env.MAX_ARTICLES_PER_PAGE || 10;
 const create = async (req, res, next) => {
     const payload = req.body;
 
-    let user;
-
-    try {
-        user = await User.findById(req.userData.id);
-    } catch (err) {
-        const error = new HttpError(
-            'La création du journal a échouée, resseyez utérieurement',
-            500
-        );
-        return next(error);
-    }
-    if(!user){
-        const error = new HttpError(
-            "L'utilisateur est introuvable.",
-            404
-        );
-        return next(error);
-    }
-    if(user.role=="editor"){
-        const error = new HttpError(
-            "Vous n'êtes pas autorisé pour créer un journal",
-            403
-        );
-        return next(error);
-    }
+    checkIfEditor(req.userData.id);
 
     const { error } = joiSchema.validate(payload);
     if (error) return res.status(400).send({message : error.details[0].message});
@@ -55,6 +31,8 @@ const create = async (req, res, next) => {
 }
 
 const update = async (req, res) => {
+    checkIfEditor(req.userData.id);
+    
     const payload = req.body;
     const { error } = joiSchema.validate(payload);
     if (error) return res.status(400).send({message : error.details[0].message});
@@ -66,6 +44,8 @@ const update = async (req, res) => {
 }
 
 const deleteArticle = async (req, res) => {
+    checkIfEditor(req.userData.id);
+
     const article = await Article.findByIdAndDelete(req.params.id).exec()
     .then( (data) => {
         if (!data) return res.status(404).send({message : "L'article n'existe pas."});
@@ -74,6 +54,8 @@ const deleteArticle = async (req, res) => {
 }
 
 const storeArticleInJournal = async (req, res) => {
+    checkIfEditor(req.userData.id);
+
     const { idJournal, idArticle } = req.params;
 
     const journal = await Journal.findById(idJournal);
@@ -159,13 +141,40 @@ const acceptArticle = (req, res) => {
         } );
     }
     else {
-        Article.findByIdAndUpdate(id, {published: false, message: message}).exec()
+        Article.findByIdAndUpdate(id, {published: false, message: message, journal: null}).exec()
         .then( (data) => {
             if (!data) return res.status(404).send({message : "L'article n'existe pas."});
             res.status(200).send("Article refusé.");
         }).catch( (err) => {
             res.status(500).send({message : "Erreur lors de la publication de l'article."});
         } );
+    }
+}
+
+const checkIfEditor = async (id) => {
+    let user;
+    try {
+        user = await User.findById(id);
+    } catch (err) {
+        const error = new HttpError(
+            'La création de l\'article a échouée, réessayez utérieurement',
+            500
+        );
+        return next(error);
+    }
+    if(!user){
+        const error = new HttpError(
+            "L'utilisateur est introuvable.",
+            404
+        );
+        return next(error);
+    }
+    if(user.role=="editor"){
+        const error = new HttpError(
+            "Vous n'êtes pas autorisé pour créer un article",
+            403
+        );
+        return next(error);
     }
 }
 
