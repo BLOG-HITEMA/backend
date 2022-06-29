@@ -27,7 +27,6 @@ const createJournal = async (req, res, next) => {
     }
     const {title} = req.body;
 
-    
     let user;
     try {
         user = await User.findById(req.userData.id);
@@ -38,11 +37,17 @@ const createJournal = async (req, res, next) => {
         );
         return next(error);
     }
-
     if(!user){
         const error = new HttpError(
             "L'utilisateur est introuvable.",
             404
+        );
+        return next(error);
+    }
+    if(user.role=="author"){
+        const error = new HttpError(
+            "Vous n'êtes pas autorisé pour créer un journal",
+            403
         );
         return next(error);
     }
@@ -61,5 +66,9 @@ const createJournal = async (req, res, next) => {
     res.status(201).json(createdJournal)
 }
 
+const updateJournal = async (req, res, next) => {
+
+}
+exports.updateJournal = updateJournal;
 exports.getJournals = getJournals;
 exports.createJournal = createJournal;
