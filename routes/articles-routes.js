@@ -8,8 +8,6 @@ router.get("/articlesByAuthor/:id", articleController.getArticlesByAuthor);
 
 router.use(checkAuth);
 
-const checkAuth = require('../middleware/check-auth');
-
 router.post('/create', articleController.create);
 
 router.patch('/update/:id', articleController.update);
