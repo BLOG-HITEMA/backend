@@ -104,6 +104,11 @@ const getArticlesByAuthor = async (req, res) => {
     res.status(200).send(articles);
 }
 
+const getAll = async (req, res) => {
+    const articles = await Article.find();
+    return articles;
+}
+
 const acceptArticle = (req, res) => {
     const { message } = req.body;
     const accept = req.params.accept;
@@ -129,4 +134,4 @@ const acceptArticle = (req, res) => {
     }
 }
 
-module.exports = { create, update, deleteArticle, storeArticleInJournal, getArticlesByAuthor, acceptArticle };
+module.exports = { create, update, deleteArticle, storeArticleInJournal, getArticlesByAuthor, acceptArticle, getAll };
