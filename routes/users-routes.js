@@ -4,6 +4,8 @@ const router = express.Router();
 
 const usersControllers = require('../controllers/users-controllers')
 
+router.get('/reconnect', usersControllers.reconnect)
+
 router.post('/signup', [
     check('name').not().isEmpty(),
     check('firstname').not().isEmpty(),
@@ -12,9 +14,9 @@ router.post('/signup', [
     check('role').not().isEmpty()
 ],usersControllers.signup)
 
-router.get('/:id', usersControllers.getUserById)
-
 router.get('/', usersControllers.getUsers)
+
+router.get('/:id', usersControllers.getUserById)
 
 router.post('/login', usersControllers.login)
 
