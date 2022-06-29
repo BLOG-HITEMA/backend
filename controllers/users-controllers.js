@@ -163,7 +163,7 @@ const login = async (req, res, next) => {
     var token = "";
     try{
         token = jwt.sign(
-            {userId:existingUser.id, email:existingUser.email},
+            {id:existingUser.id, email:existingUser.email},
             process.env.CLE_TOKEN, 
             {expiresIn:'1h'}
         );
