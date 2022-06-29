@@ -8,9 +8,11 @@ router.get("/author/:id", articleController.getArticlesByAuthor);
 
 router.get("/", articleController.getAll);
 
-router.get("/search/:page/:search", articleController.search);
+router.get("/search/:page", articleController.search);
 
 router.get("/:id", articleController.getArticleById);
+
+// router.get("/journal/:idJournal", articleController.getArticlesByJournal);
 
 
 router.use(checkAuth);
