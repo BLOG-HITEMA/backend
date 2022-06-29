@@ -26,9 +26,11 @@ const createJournal = async (req, res, next) => {
         return next(error);
     }
     const {title} = req.body;
+
+    
     let user;
     try {
-        user = await User.findById(req.userData.userId);
+        user = await User.findById(req.userData.id);
     } catch (err) {
         const error = new HttpError(
             'La création du journal a échouée, resseyez utérieurement',
@@ -44,6 +46,19 @@ const createJournal = async (req, res, next) => {
         );
         return next(error);
     }
+    try {
+        const createdJournal = new Journal({
+            title,
+            user:user
+        })
+    } catch (err) {
+        const error = new HttpError(
+            'La création du journal a échouée, ressayez utérieurement',
+            500
+        );
+        return next(error)
+    }
+    res.status(201).json(createdJournal)
 }
 
 exports.getJournals = getJournals;

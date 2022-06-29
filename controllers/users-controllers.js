@@ -62,10 +62,16 @@ const signup = async (req, res , next) => {
     res.status(201).send({"message": "CREATED"});
 }
 
-const getUserByName = async (req, res, next) => {
-    const userName = req.params.name;
+const getUsers = async (req, res, next) => {
+    const users = await User.find({});
 
-    const user = await User.findOne({name:userName});
+    res.status(200).json(users);
+}
+
+const getUserById = async (req, res, next) => {
+    const userId = req.params.id;
+
+    const user = await User.findOne({_id:userId});
 
     if(!user){
         throw new HttpError("User doesn't exist!" , 404)
@@ -74,10 +80,10 @@ const getUserByName = async (req, res, next) => {
 }
 
 const updateUser = async (req, res, next) => {
-    const nom = req.params.name;
+    const id = req.params.id;
     const {name, firstname, password} = req.body;
 
-    const userToUpdate = await User.findOne({name: nom});
+    const userToUpdate = await User.findOne({_id: id});
     let hashedPassword;
     try{
         hashedPassword = await bcrypt.hash(password, 12);
@@ -104,8 +110,8 @@ const updateUser = async (req, res, next) => {
 }
 
 const deleteUser = async (req, res, nex) => {
-    const name = req.params.name;
-    const userToDelete = await User.findOne({name: name});
+    const id = req.params.id;
+    const userToDelete = await User.findOne({_id: id});
     
     try {
        await userToDelete.delete();
@@ -173,14 +179,18 @@ const login = async (req, res, next) => {
             500
         )
     }
-    res.set('Auhtorization', 'Bearer '+token);
+    res.set('Authorization', 'Bearer '+token);
     res.status(200)
     res.json({
-        message : "CONNECTED"
+        name: existingUser.name,
+        firstname: existingUser.firstname,
+        email: existingUser.email,
+        role : existingUser.role
     })
 }
 
-exports.getUserByName = getUserByName;
+exports.getUsers = getUsers;
+exports.getUserById = getUserById;
 exports.updateUser = updateUser;
 exports.deleteUser = deleteUser;
 exports.signup = signup;
