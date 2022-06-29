@@ -10,7 +10,7 @@ const create = async (req, res) => {
     delete payload.token;
 
     const { error } = joiSchema.validate(payload);
-    if (error) return res.status(400).send(error.details[0].message);
+    if (error) return res.status(400).send({message : error.details[0].message});
 
     let user = null;
     let article = null;
@@ -51,16 +51,16 @@ const create = async (req, res) => {
         return res.status(201).send(article);
     }
 
-    res.status(400).send("L'auteur n'a pas été préciser.");
+    res.status(400).send({message : "L'auteur n'a pas été préciser."});
 }
 
 const update = async (req, res) => {
     const payload = req.body;
     const { error } = joiSchema.validate(payload);
-    if (error) return res.status(400).send(error.details[0].message);
+    if (error) return res.status(400).send({message : error.details[0].message});
 
     const article = await Article.findByIdAndUpdate(req.params.id, payload);
-    if (!article) return res.status(404).send("L'article n'existe pas.");
+    if (!article) return res.status(404).send({message : "L'article n'existe pas."});
 
     res.status(200).send({ _id : article._id, ...payload});
 }
@@ -104,6 +104,11 @@ const getArticlesByAuthor = async (req, res) => {
     res.status(200).send(articles);
 }
 
+const getAll = async (req, res) => {
+    const articles = await Article.find();
+    return articles;
+}
+
 const acceptArticle = (req, res) => {
     const { message } = req.body;
     const accept = req.params.accept;
@@ -129,4 +134,4 @@ const acceptArticle = (req, res) => {
     }
 }
 
-module.exports = { create, update, deleteArticle, storeArticleInJournal, getArticlesByAuthor, acceptArticle };
+module.exports = { create, update, deleteArticle, storeArticleInJournal, getArticlesByAuthor, acceptArticle, getAll };

@@ -15,4 +15,6 @@ router.get("/articlesByAuthor/:id", articleController.getArticlesByAuthor);
 
 router.patch("/accept/:accept/:idArticle", articleController.acceptArticle);
 
+router.get("/all", articleController.getAll);
+
 module.exports = router;
