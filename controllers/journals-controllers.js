@@ -1,11 +1,11 @@
 const HttpError = require('../models/http-error');
 const Journal = require('../models/journal');
 const User = require('../models/user');
+const {Article} = require('../models/article');
 const { validationResult } = require('express-validator')
 
 const getJournals = async (req, res, next) => {
     const journals = await Journal.find({});
-
     if(journals.length == 0){
         const error = new HttpError(
             "Il n'ya pas de journal pour le moment" , 
@@ -13,16 +13,29 @@ const getJournals = async (req, res, next) => {
         )
         return next(error);
     }
+    let data = await Promise.all(journals.map(async (journal) => {
+        journal.user = await User.findOne({_id: journal.user});
+        journal.articles = await Article.find({journal: journal._id})
+    }))
     res.status(200).json(journals);
 }
 const getJournalById = async (req, res, next) => {
     const id = req.params.id;
 
     const journal = await Journal.findOne({_id:id});
-
+    const user = await User.findOne({_id: journal.user});
+    const articles = await Article.find({journal: journal._id})
     if(!journal){
-        throw new HttpError("Journal n'existe pas!" , 404)
+        const err = HttpError("Journal n'existe pas!" , 404)
+        return next(err)
     }
+    if(!user){
+        const err = HttpError("User n'existe pas!" , 404)
+        return next(err)
+    }
+    
+    journal.user=user;
+    journal.articles=articles;
     res.status(200).json(journal)
 }
 const createJournal = async (req, res, next) => {
