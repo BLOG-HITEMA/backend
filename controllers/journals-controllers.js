@@ -163,7 +163,7 @@ const getJournalByEditor = async (req, res, next) => {
         const err = HttpError("L'éditeur n'existe pas!" , 404)
         return next(err)
     }
-    const journal = await Journal.findOne({user:idEditor});
+    const journal = await Journal.find({user:idEditor});
     if(!journal){
         const err = new HttpError("Journal n'existe pas!" , 404)
         return next(err)
