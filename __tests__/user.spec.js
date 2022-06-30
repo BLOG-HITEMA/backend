@@ -152,19 +152,35 @@ test("POST user to database and check if all data are inserted", async () => {
 
 // Vérifier la connexion de l'utilisateur
 test("Vérifier la connexion de l'utilisateur", async () => {
+  let r = (Math.random() + 1).toString(36).substring(7);
+  let name = (Math.random() + 1).toString(35).substring(3);
+  let email = r+"@gmail.com";
+  //Créer un utilisateur de test et le stocker dans Mongo
+  let hashedPassword = await bcrypt.hash("secret1234", 12);
   const user = {
-    password: "taha1234",
-    email: "taha@gmail.com"
+    name,
+    firstname: "toto",
+    password: hashedPassword,
+    email,
+    role: "editor"
+  }
+  // Insérer l'utilisateur dans la BD
+	const newUser = await User.create(user)
+  const userConnect = {
+    password: "secret1234",
+    email: email
   }
   const result = request(app)
-      .post(baseUrl+"/login")
-      .send(user)
-      .expect(200);
-
-  const existingUser = await User.findOne({email: user.email});
-  const rs = await bcrypt.compare(user.password, existingUser.password);
+  .post(baseUrl+"/login")
+  .send(userConnect)
+  .expect(200);
+  
+  const existingUser = await User.findOne({email: userConnect.email});
+  const rs = await bcrypt.compare(userConnect.password, existingUser.password);
   expect(rs).toEqual(true)
-
+  // Supprimer l'utilisateur de test.
+  const delUser = await User.deleteOne({email: email});
+  
 })
 it("Renvoie une erreur si le mot de passe est faux", async () => {
   try {
@@ -181,8 +197,57 @@ it("Renvoie une erreur si le mot de passe est faux", async () => {
 })
 
 // Vérifier la modification de l'utilisateur
+it("Modifie l'utilisateur", async () => {
+  let r = (Math.random() + 1).toString(36).substring(7);
+  let name = (Math.random() + 1).toString(35).substring(3);
+  let email = r+"@gmail.com";
+  //Créer un utilisateur de test et le stocker dans Mongo
+  let hashedPassword = await bcrypt.hash("secret1234", 12);
+  const user = {
+    name,
+    firstname: "toto",
+    password: hashedPassword,
+    email,
+    role: "editor"
+  }
+  // Insérer l'utilisateur dans la BD
+	const newUser = await User.create(user)
+  newUser.name="tahaUpdated";
+  newUser.firstname="totUpdated";
+  const userUpdate = {
+    name: "tahaUpdated",
+    firstname: "totUpdated"
+  }
+  const result = request(app)
+  .patch(baseUrl+"/"+newUser._id)
+  .send(userUpdate)
+  .expect(201);
+  const delUser = await User.deleteOne({email: email});
 
+})
 // Vérifier la suppréssion de l'utilisateur
+it("Supprimer l'utilisateur", async () => {
+  let r = (Math.random() + 1).toString(36).substring(7);
+  let name = (Math.random() + 1).toString(35).substring(3);
+  let email = r+"@gmail.com";
+  //Créer un utilisateur de test et le stocker dans Mongo
+  let hashedPassword = await bcrypt.hash("secret1234", 12);
+  const user = {
+    name,
+    firstname: "toto",
+    password: hashedPassword,
+    email,
+    role: "editor"
+  }
+  // Insérer l'utilisateur dans la BD
+	const newUser = await User.create(user)
+  
+  
+  const result = request(app)
+  .delete(baseUrl+"/"+newUser._id)
+  .expect(200);
+  const delUser = await User.deleteOne({email: email});
+})
 // Fermer la connexion
 afterEach((done) => {
 	mongoose.connection.db.dropDatabase(() => {
