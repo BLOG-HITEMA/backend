@@ -107,6 +107,8 @@ const getAll = async (req, res, next) => {
 
     // res.status(200).send({articles, page, max_pages});
 
+    articles = articles.filter(e => e.published === true);
+
     res.status(200).send(articles);
 }
 
@@ -118,7 +120,7 @@ const search = async (req, res, next) => {
     let articles = (await Article.find());
 
     articles = articles
-    .filter(e => e.title === search || e.content === search)
+    .filter(e => (e.title === search && e.published === true) || (e.content === search && e.published === true))
     .splice((page - 1) * max_articles_number, max_articles_number * page);
     
     const max_pages = articles.length / max_articles_number;

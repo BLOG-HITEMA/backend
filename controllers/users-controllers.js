@@ -182,7 +182,7 @@ const login = async (req, res, next) => {
     res.set('Authorization', 'Bearer '+token);
     res.status(200)
     res.json({
-        id: existingUser.id,
+        _id: existingUser.id,
         name: existingUser.name,
         firstname: existingUser.firstname,
         email: existingUser.email,
