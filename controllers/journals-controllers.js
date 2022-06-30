@@ -25,8 +25,9 @@ const getJournalById = async (req, res, next) => {
     const id = req.params.id;
 
     const journal = await Journal.findOne({_id:id});
-    const user = await User.findOne({_id: journal.user});
-    const articles = await Article.find({journal: journal._id})
+    let user = await User.findOne({_id: journal.user});
+    let articles = await Article.find({journal: journal._id})
+
     if(!journal){
         const err = HttpError("Journal n'existe pas!" , 404)
         return next(err)
@@ -35,8 +36,15 @@ const getJournalById = async (req, res, next) => {
         const err = HttpError("User n'existe pas!" , 404)
         return next(err)
     }
-    delete user.password;
+    user.password=undefined;
     journal.user=user;
+    
+    let data = await Promise.all(articles.map(async (article) => {
+        const userr = await User.find({_id: article.user});
+        userr.password = undefined;
+        article.user = userr;
+    }))
+    
     journal.articles=articles;
     res.status(200).json(journal)
 }
@@ -160,7 +168,7 @@ const getJournalByEditor = async (req, res, next) => {
     const idEditor = req.params.id;
     const user = await User.findOne({_id: idEditor});
     if(!user){
-        const err = HttpError("L'éditeur n'existe pas!" , 404)
+        const err = new HttpError("L'éditeur n'existe pas!" , 404)
         return next(err)
     }
     const journal = await Journal.find({user:idEditor});
@@ -177,9 +185,13 @@ const getJournalByEditor = async (req, res, next) => {
 }
 
 const getArticlesNonPublished = async (req, res, next) => {
+    const role = await getUserRole(req.userData.id);
+    if(role == "author"){
+        return res.status(403).send({"message": "Vous n'êtes pas autorisé!"})
+    }
     const id = req.userData.id;
-
-    const journals = await Journal.find();
+    const user = await User.findById(id);
+    const journals = await Journal.find({user:user._id});
 
     let data = await Promise.all(journals.map(async (journal) => {
         journal.articles = await Article.find({journal: journal._id, published:false})
@@ -187,6 +199,7 @@ const getArticlesNonPublished = async (req, res, next) => {
     
     res.status(200).json(journals)
 }
+
 exports.getJournals = getJournals;
 exports.getJournalById = getJournalById;
 exports.createJournal = createJournal;
