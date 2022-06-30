@@ -14,7 +14,9 @@ const getJournals = async (req, res, next) => {
         return next(error);
     }
     let data = await Promise.all(journals.map(async (journal) => {
-        journal.user = await User.findOne({_id: journal.user});
+        const user = await User.findOne({_id: journal.user});
+        delete user.password;
+        journal.user=user;
         journal.articles = await Article.find({journal: journal._id})
     }))
     res.status(200).json(journals);
@@ -33,7 +35,7 @@ const getJournalById = async (req, res, next) => {
         const err = HttpError("User n'existe pas!" , 404)
         return next(err)
     }
-    
+    delete user.password;
     journal.user=user;
     journal.articles=articles;
     res.status(200).json(journal)
