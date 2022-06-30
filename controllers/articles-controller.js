@@ -182,7 +182,7 @@ const getUserRole= async (id) => {
     try {
         user = await User.findById(id);
     } catch (err) {
-        console.log('La création du d\'article a échouée, réessayez utérieurement')
+        console.log('La création de l\'article a échouée, réessayez utérieurement')
     }
     if(!user){
         console.log("L'utilisateur est introuvable.");

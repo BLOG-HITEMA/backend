@@ -111,7 +111,7 @@ describe("CRUD Articles", () => {
 
     // Ne pas créer un nouvel article
     it.each(articlesInvalid)(
-        "POST / devrait refuser %p sans l'insérer car l'utilisateur n'est pas connecté.",
+        "POST / devrait refuser %p sans l'insérer.",
         (invalidObject) => {
             connexion()
                 .then( async (token) => {
@@ -144,79 +144,96 @@ describe("CRUD Articles", () => {
     );
 
 
-    // // Ne pas mettre à jour un article
-    // it.each(articlesInvalid)(
-    //     "PATCH /:id ne devrait pas insérer %p dans les articles car l'utilisateur n'est pas connecté.", 
-    //     async (articleUpdated) => {
-    //         const articleInitial = {...article};
+    // Ne pas mettre à jour un article
+    it.each(articlesInvalid)(
+        "PATCH /:id ne devrait pas insérer %p dans les articles.", 
+        (articleUpdated) => {
+            connexion()
+                .then( async (token) => {
+                    const articleInitial = {...article};
 
-    //         const result = await request(app)
-    //             .patch("/api/articles/abcdf8f8f8f8f8f8f8f8f8f8")
-    //             .send(articleUpdated)
-    //             .expect(403)
-    //             .expect("Content-Type", /json/)
-    //         ;
+                    const result = await request(app)
+                        .patch("/api/articles/abcdf8f8f8f8f8f8f8f8f8f8")
+                        .set('Authorization', 'Bearer ' + token)
+                        .send(articleUpdated)
+                        .expect(400)
+                        .expect("Content-Type", /json/)
+                    ;
 
-    //         expect(article).toEqual(articleInitial);
-    //     }
-    // );
-    // // Mettre à jour un article
-    // it.each(articlesValid)(
-    //     "PATCH /:id devrait insérer %p dans les articles.", 
-    //     async (articleUpdated) => {
-    //         const articleInitial = await Article.findById("abcdf8f8f8f8f8f8f8f8f8f8");
+                    // expect(article).toEqual(articleInitial);
+                })
+        }
+    );
+    // Mettre à jour un article
+    it.each(articlesValid)(
+        "PATCH /:id devrait insérer %p dans les articles.", 
+        (articleUpdated) => {
+            connexion()
+                .then( async (token) => {
+                    const articleInitial = await Article.findById("abcdf8f8f8f8f8f8f8f8f8f8");
 
-    //         const result = await request(app)
-    //             .patch("/api/articles/abcdf8f8f8f8f8f8f8f8f8f8")
-    //             .send(articleUpdated)
-    //             .expect(200)
-    //             .expect("Content-Type", /json/)
-    //         ;
+                    const result = await request(app)
+                        .patch("/api/articles/abcdf8f8f8f8f8f8f8f8f8f8")
+                        .set('Authorization', 'Bearer ' + token)
+                        .send(articleUpdated)
+                        .expect(200)
+                        .expect("Content-Type", /json/)
+                    ;
 
-    //         expect(result.body).not.toEqual(articleInitial._doc);
-    //     }
-    // );
-
-
-    // // Ne pas supprimer un article
-    // it("DELETE /:id ne devrait pas supprimer un article.", 
-    //     async () => {
-    //         const result = await request(app)
-    //             .delete("/api/articles/abcdf8f8f8f8f8f8f8f8f8f9")
-    //             .expect(404)
-    //             .expect("Content-Type", /json/);
-
-    //     }
-    // );
-    // // Supprimer un article
-    // it("DELETE /:id devrait supprimer un article.", 
-    //     async () => {
-    //         const result = await request(app)
-    //             .delete("/api/articles/abcdf8f8f8f8f8f8f8f8f8f8")
-    //             .expect(200)
-    //         ;
-    //     }
-    // );
+                    expect(result.body).not.toEqual(articleInitial._doc);
+                })
+        }
+    );
 
 
-    // // Ne pas récupérer un article
-    // it("GET /:id ne devrait pas récupérer un article.",
-    //     async () => {
-    //         const result = await request(app)
-    //             .get("/api/articles/abcdf8f8f8f8f8f8f8f8f8f8")
-    //             .expect(404)
-    //             .expect("Content-Type", /json/);
-    //     }
-    // );
-    // // Récupérer un article
-    // it("GET /:id devrait récupérer un article.",
-    //     async () => {
-    //         const result = await request(app)
-    //             .get("/api/articles/abcdf8f8f8f8f8f8f8f8f8f8")
-    //             .expect(200)
-    //             .expect("Content-Type", /json/);
-    //     }
-    // );
+    // Ne pas supprimer un article
+    it("DELETE /:id ne devrait pas supprimer un article.", 
+        () => {
+            connexion()
+                .then( async (token) => {
+                    const result = await request(app)
+                        .delete("/api/articles/abcdf8f8f8f8f8f8f8f8f8f9")
+                        .set('Authorization', 'Bearer ' + token)
+                        .expect(404)
+                        .expect("Content-Type", /json/)
+                    ;
+
+                })
+        }
+    );
+    // Supprimer un article
+    it("DELETE /:id devrait supprimer un article.", 
+        () => {
+            connexion()
+                .then( async (token) => {
+                    const result = await request(app)
+                        .delete("/api/articles/abcdf8f8f8f8f8f8f8f8f8f8")
+                        .set('Authorization', 'Bearer ' + token)
+                        .expect(200)
+                    ;
+                })
+        }
+    );
+
+
+    // Ne pas récupérer un article
+    it("GET /:id ne devrait pas récupérer un article.",
+        async () => {
+            const result = await request(app)
+                .get("/api/articles/abcdf8f8f8f8f8f8f8f8f8f9")
+                .expect(404)
+                .expect("Content-Type", /json/);
+        }
+    );
+    // Récupérer un article
+    it("GET /:id devrait récupérer un article.",
+        async () => {
+            const result = await request(app)
+                .get("/api/articles/abcdf8f8f8f8f8f8f8f8f8f8")
+                .expect(200)
+                .expect("Content-Type", /json/);
+        }
+    );
 
     afterEach( async () => {
         const findArticle = await Article.findById("abcdf8f8f8f8f8f8f8f8f8f8");
