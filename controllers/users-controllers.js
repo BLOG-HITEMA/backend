@@ -182,6 +182,7 @@ const login = async (req, res, next) => {
     res.set('Authorization', 'Bearer '+token);
     res.status(200)
     res.json({
+        id: existingUser.id,
         name: existingUser.name,
         firstname: existingUser.firstname,
         email: existingUser.email,
@@ -210,6 +211,9 @@ const reconnect = async (req, res, next) => {
         )
         return next(error);
     }
+    
+    delete userData.password;
+
     res.status(200).json(userData);
 }
 
