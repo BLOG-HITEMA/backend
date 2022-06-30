@@ -24,7 +24,5 @@ module.exports = (req, res, next) => {
             403
         )
         return next(error);
-    }
-
-    
+    }    
 }
