@@ -74,7 +74,8 @@ const getUserById = async (req, res, next) => {
     const user = await User.findOne({_id:userId});
 
     if(!user){
-        throw new HttpError("User doesn't exist!" , 404)
+        const error =  new HttpError("User doesn't exist!" , 404);
+        return next(error);
     }
     res.status(200).json(user)
 }
