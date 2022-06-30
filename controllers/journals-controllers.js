@@ -176,9 +176,21 @@ const getJournalByEditor = async (req, res, next) => {
     res.status(200).json(journal)
 }
 
+const getArticlesNonPublished = async (req, res, next) => {
+    const id = req.userData.id;
+
+    const journals = await Journal.find();
+
+    let data = await Promise.all(journals.map(async (journal) => {
+        journal.articles = await Article.find({journal: journal._id, published:false})
+    }))
+    
+    res.status(200).json(journals)
+}
 exports.getJournals = getJournals;
 exports.getJournalById = getJournalById;
 exports.createJournal = createJournal;
 exports.updateJournal = updateJournal;
 exports.deleteJournal = deleteJournal;
 exports.getJournalByEditor = getJournalByEditor;
+exports.getArticlesNonPublished = getArticlesNonPublished;

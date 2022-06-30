@@ -12,6 +12,8 @@ router.get("/editor/:id", journalsControllers.getJournalByEditor);
 
 router.use(checkAuth);
 
+router.get('/articles/enAttente', journalsControllers.getArticlesNonPublished);
+
 router.post('/', [
     check('title').not().isEmpty()
 ], journalsControllers.createJournal)
