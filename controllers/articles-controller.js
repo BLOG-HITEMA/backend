@@ -110,7 +110,11 @@ const getAll = async (req, res, next) => {
     // res.status(200).send({articles, page, max_pages});
 
     articles = articles.filter(e => e.published === true);
-
+    let data = await Promise.all(articles.map(async (article) => {
+        const user = await User.findOne({_id: article.user});
+        delete user.password;
+        article.user = user;
+    }))
     res.status(200).send(articles);
 }
 
@@ -135,6 +139,7 @@ const getArticleById = async (req, res, next) => {
 
     const article = await Article.findById(id);
     const user = await User.findOne({_id: article.user});
+    delete user.password;
     const journal = await User.findOne({_id: article.journal})
     if (!article) return res.status(404).send({message : "L'article n'existe pas."});
     article.user = user;
@@ -188,7 +193,7 @@ const getUserRole= async (id) => {
     try {
         user = await User.findById(id);
     } catch (err) {
-        console.log('La création du d\'article a échouée, réessayez utérieurement')
+        console.log('La création de l\'article a échouée, réessayez utérieurement')
     }
     if(!user){
         console.log("L'utilisateur est introuvable.");
