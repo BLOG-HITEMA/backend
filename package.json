@@ -5,7 +5,10 @@
   "main": "app.js",
   "scripts": {
     "test": "npx jest --watchAll",
-    "start": "nodemon app.js"
+    "start": "node app.js"
+  },
+  "engines": {
+    "node": "16.13.2"
   },
   "repository": {
     "type": "git",
@@ -29,7 +32,8 @@
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.4.0",
     "mongoose-unique-validator": "^3.1.0",
-    "supertest": "^6.2.3"
+    "supertest": "^6.2.3",
+    "nodemon": "^2.0.18"
   },
   "devDependencies": {
     "nodemon": "^2.0.18"
