@@ -22,7 +22,7 @@ const create = async (req, res, next) => {
         published: payload.published,
         image: payload.image,
         message: payload.message,
-        user: user._id
+        user: req.userData.id
     });
 
     await article.save();
