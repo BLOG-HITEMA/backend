@@ -29,21 +29,15 @@ describe("CRUD Articles", () => {
     ];
     
     let article;
-    let token;
+    // let token;
 
-    (async function signup() {
+    async function signup() {
         const userSignup = {
             name: "User-Test", 
             firstname : "user", 
             email : "user1234test@gmail.com", 
             password : "test1234", 
             role : "author"
-        }
-    
-        const findUser = await User.findOne({email : userSignup.email});
-    
-        if(findUser){
-            await User.findByIdAndDelete(findUser._id);
         }
         
         const userSignupMongoose = new User({
@@ -52,7 +46,15 @@ describe("CRUD Articles", () => {
         });
     
         await userSignupMongoose.save();
-    })();
+    };
+
+    async function deleteUser() {
+        const findUser = await User.findOne({email : "user1234test@gmail.com"});
+    
+        if(findUser){
+            await User.findByIdAndDelete(findUser._id);
+        }
+    };
 
     async function connexion() {
         const userLogin = {
@@ -79,15 +81,7 @@ describe("CRUD Articles", () => {
             () => done()
         )
     
-        // connexion()
-        //     .then((data) => {
-        //         // token = data;
-        //         console.log(data);
-        //     })
-        //     .catch((err) => {
-        //         console.error(err);
-        //     })
-        // ;
+        signup();
     });
     
     beforeEach( (done) => {
@@ -115,13 +109,6 @@ describe("CRUD Articles", () => {
         )
     })
 
-    // connexion()
-    //     .then( (token) => console.log(token)  )
-    //     .catch( (err) => console.error(err) )
-    // ;
-
-    // console.log(token);
-
     // Ne pas créer un nouvel article
     it.each(articlesInvalid)(
         "POST / devrait refuser %p sans l'insérer car l'utilisateur n'est pas connecté.",
@@ -138,19 +125,23 @@ describe("CRUD Articles", () => {
                 })
         }
     );
-    // // Créer un nouvel article
-    // it.each(articlesValid)(
-    //     "POST / devrait insérer %p dans les articles.",
+    // Créer un nouvel article
+    it.each(articlesValid)(
+        "POST / devrait insérer %p dans les articles.",
         
-    //     async (article) => {
-    //         const result = await request(app)
-    //             .post("/api/articles/")
-    //             .send(article)
-    //         ;
-    //         expect(201);
-    //     }
+        (article) => {
+            connexion()
+                .then( async (token) => {
+                    const result = await request(app)
+                        .post("/api/articles/")
+                        .set('Authorization', 'Bearer ' + token)
+                        .send(article)
+                    ;
+                    expect(201);
+                })
+        }
 
-    // );
+    );
 
 
     // // Ne pas mettre à jour un article
@@ -226,35 +217,28 @@ describe("CRUD Articles", () => {
     //             .expect("Content-Type", /json/);
     //     }
     // );
-})
 
-
-afterEach( async () => {
-    const findArticle = await Article.findById("abcdf8f8f8f8f8f8f8f8f8f8");
-
-    if (findArticle) {
-        await Article.findByIdAndDelete("abcdf8f8f8f8f8f8f8f8f8f8");
-    }
-	mongoose.connection.close()
-})
-
-// afterEach((done) => {
-//     mongoose.connection.close( async () => {
-//         const findArticle = await Article.findById("abcdf8f8f8f8f8f8f8f8f8f8");
+    afterEach( async () => {
+        const findArticle = await Article.findById("abcdf8f8f8f8f8f8f8f8f8f8");
     
-//         if (findArticle) {
-//             await Article.findByIdAndDelete("abcdf8f8f8f8f8f8f8f8f8f8");
-//         }
-//         done();
-//     });
-// })
+        if (findArticle) {
+            await Article.findByIdAndDelete("abcdf8f8f8f8f8f8f8f8f8f8");
+        }
+        mongoose.connection.close()
+    })
+    
+    afterAll( (done) => {
+        // await Article.findByIdAndDelete("abcdf8f8f8f8f8f8f8f8f8f8");
+        mongoose.connect(
+            process.env.URL_MONGO,
+            { useNewUrlParser: true },
+            () => {
+                deleteUser();
+                done()
+            }
+        )
+    
+        // mongoose.connection.close(() => done())
+    });
+})
 
-afterAll( (done) => {
-    // await Article.findByIdAndDelete("abcdf8f8f8f8f8f8f8f8f8f8");
-    mongoose.connect(
-		process.env.URL_MONGO,
-		{ useNewUrlParser: true },
-        () => done()
-	)
-    // mongoose.connection.close(() => done())
-});
