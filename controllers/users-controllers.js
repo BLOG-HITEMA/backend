@@ -142,7 +142,7 @@ const login = async (req, res, next) => {
 
     if(!existingUser){
         const error = new HttpError(
-            'Utilisateur introuvable',
+            'Données incorrect, vous ne pouvez pas vous connecter 1',
             403
         )
         return next(error);
@@ -154,14 +154,14 @@ const login = async (req, res, next) => {
 
     }catch(err){
         const error = new HttpError(
-            'Erreur serveur',
+            'Données incorrect, vous ne pouvez pas vous connecter 2',
             500
         )
         return next(error);
     }
     if(!isValidPassword){
         const error = new HttpError(
-            'Password faux',
+            'Données incorrect, vous ne pouvez pas vous connecter 3',
             401
         )
         return next(error);

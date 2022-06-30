@@ -8,6 +8,7 @@ const articlesControllers = require('../controllers/articles-controller');
 router.get('/', journalsControllers.getJournals)
 router.get('/:id', journalsControllers.getJournalById)
 router.get('/:id/articles', articlesControllers.getArticlesOfJournal)
+router.get("/editor/:id", journalsControllers.getJournalByEditor);
 
 router.use(checkAuth);
 
