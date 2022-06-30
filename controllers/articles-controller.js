@@ -82,6 +82,7 @@ const storeArticleInJournal = async (req, res, next) => {
     res.status(200).send("L'article a été ajouter au journal.");
 }
 
+
 const getArticlesByAuthor = async (req, res, next) => {
     const author = req.params.id;
 
