@@ -92,7 +92,9 @@ const getArticlesByAuthor = async (req, res, next) => {
     const articles = await Article.find({user: author});
 
     if (!articles) return res.status(404).send({message : "Aucun article n'a été trouvé."});
-    
+    let data = await Promise.all(articles.map(async (article) => {
+        article.journal = await Journal.findOne({_id: article.journal});
+    }))
     res.status(200).send(articles);
 }
 
@@ -108,7 +110,11 @@ const getAll = async (req, res, next) => {
     // res.status(200).send({articles, page, max_pages});
 
     articles = articles.filter(e => e.published === true);
-
+    let data = await Promise.all(articles.map(async (article) => {
+        const user = await User.findOne({_id: article.user});
+        delete user.password;
+        article.user = user;
+    }))
     res.status(200).send(articles);
 }
 
@@ -132,9 +138,12 @@ const getArticleById = async (req, res, next) => {
     const id = req.params.id;
 
     const article = await Article.findById(id);
-
+    const user = await User.findOne({_id: article.user});
+    delete user.password;
+    const journal = await User.findOne({_id: article.journal})
     if (!article) return res.status(404).send({message : "L'article n'existe pas."});
-
+    article.user = user;
+    article.journal = journal;
     res.status(200).send(article);
 }
 
@@ -173,7 +182,9 @@ const getArticlesOfJournal = async (req, res, next) => {
     const articles = await Article.find({journal : journalID});
 
     if (!articles) return res.status(404).send({message : "Aucun article n'a été trouvé."});
-    
+    let data = await Promise.all(articles.map(async (article) => {
+        article.user = await Article.findOne({_id: article.user});
+    }))
     res.status(200).send(articles);
 }
 
