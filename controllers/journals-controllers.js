@@ -153,8 +153,30 @@ const getUserRole= async (id) => {
     }
     return user.role;
 }
+
+const getJournalByEditor = async (req, res, next) => {
+    const idEditor = req.params.id;
+    const user = await User.findOne({_id: idEditor});
+    if(!user){
+        const err = HttpError("L'éditeur n'existe pas!" , 404)
+        return next(err)
+    }
+    const journal = await Journal.findOne({user:idEditor});
+    if(!journal){
+        const err = new HttpError("Journal n'existe pas!" , 404)
+        return next(err)
+    }
+
+    const articles = await Article.find({journal: journal._id})
+    
+    journal.user=user;
+    journal.articles=articles;
+    res.status(200).json(journal)
+}
+
 exports.getJournals = getJournals;
 exports.getJournalById = getJournalById;
 exports.createJournal = createJournal;
 exports.updateJournal = updateJournal;
 exports.deleteJournal = deleteJournal;
+exports.getJournalByEditor = getJournalByEditor;
