@@ -12,8 +12,6 @@ router.get("/editor/:id", journalsControllers.getJournalByEditor);
 
 router.use(checkAuth);
 
-router.get("/brouillons", journalsControllers.getUnpublishedArticlesOfMyJournals);
-
 router.post('/', [
     check('title').not().isEmpty()
 ], journalsControllers.createJournal)
