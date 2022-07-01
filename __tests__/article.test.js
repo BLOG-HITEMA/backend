@@ -131,6 +131,16 @@ describe("CRUD Articles", () => {
         }
     );
 
+    // Récupérer tous les articles
+    it("GET / devrait récupérer tous les articles.",
+        async () => {
+            const result = await request(app)
+                .get("/api/articles")
+                .expect(200)
+                .expect("Content-Type", /json/);
+        }
+    );
+
 
     // Ne pas créer un nouvel article
     it.each(articlesInvalid)(
