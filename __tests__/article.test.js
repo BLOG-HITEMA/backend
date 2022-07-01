@@ -6,6 +6,8 @@ const User = require('../models/user');
 const { login, signup } = require('../controllers/users-controllers');
 const bcrypt = require('bcryptjs');
 
+jest.setTimeout(10000);
+
 describe("CRUD Articles", () => {
     const articlesValid = [
         { title : "test title", content : "test content" }, 
@@ -108,6 +110,27 @@ describe("CRUD Articles", () => {
             }
         )
     })
+
+
+    // Ne pas récupérer un article
+    it("GET /:id ne devrait pas récupérer un article.",
+        async () => {
+            const result = await request(app)
+                .get("/api/articles/abcdf8f8f8f8f8f8f8f8f8f9")
+                .expect(404)
+                .expect("Content-Type", /json/);
+        }
+    );
+    // Récupérer un article
+    it("GET /:id devrait récupérer un article.",
+        async () => {
+            const result = await request(app)
+                .get("/api/articles/abcdf8f8f8f8f8f8f8f8f8f8")
+                .expect(200)
+                .expect("Content-Type", /json/);
+        }
+    );
+
 
     // Ne pas créer un nouvel article
     it.each(articlesInvalid)(
@@ -216,24 +239,29 @@ describe("CRUD Articles", () => {
     );
 
 
-    // Ne pas récupérer un article
-    it("GET /:id ne devrait pas récupérer un article.",
+    it("POST /search/:page devrait récupérer les articles qui contiennent le terme recherché et sont publiés.",
         async () => {
+            let articlesPublished = await Article.find();
+
+            articlesPublished = articlesPublished.filter(
+                article => 
+                article.title == "titre" && article.published === true ||
+                article.content == "titre" && article.published === true
+            )
+
             const result = await request(app)
-                .get("/api/articles/abcdf8f8f8f8f8f8f8f8f8f9")
-                .expect(404)
-                .expect("Content-Type", /json/);
-        }
-    );
-    // Récupérer un article
-    it("GET /:id devrait récupérer un article.",
-        async () => {
-            const result = await request(app)
-                .get("/api/articles/abcdf8f8f8f8f8f8f8f8f8f8")
+                .post("/api/articles/search/1")
+                .send({
+                    search: "titre"
+                })
                 .expect(200)
-                .expect("Content-Type", /json/);
+                .expect("Content-Type", /json/)
+            ;
+
+            expect(result.body.articles).toEqual(articlesPublished);
         }
-    );
+    )
+
 
     afterEach( async () => {
         const findArticle = await Article.findById("abcdf8f8f8f8f8f8f8f8f8f8");
